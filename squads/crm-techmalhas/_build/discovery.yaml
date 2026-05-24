@@ -1,0 +1,73 @@
+squad_code: crm-techmalhas
+purpose: >
+  Criar o CRM próprio da Techmalhas, usando o Clint Digital como referência de
+  funcionalidades. CRM com pipeline Kanban, dashboard, estratégia de funil,
+  integração com WhatsApp API Oficial e obrigatoriedade de cumprir tarefas
+  pelos responsáveis no acompanhamento.
+domain: mixed
+sub_domains:
+  - automation
+  - software-development
+
+company:
+  name: Techmalhas
+  legal_name: RM Indústria e Comércio de Vestuário e Malhas LTDA
+  sector: Indústria + Comércio de Vestuário (Atacado + Varejo)
+  location: Franca / SP
+  erp: Dapic
+  channels: [E-commerce próprio, Instagram, WhatsApp]
+  tone: Acessível, direto, brasileiro, próximo
+  products: Camisetas básicas e oversized (masc/fem/infantil), Polo, Dryfit, Moletom, Coleção Copa 2026
+
+language: pt-BR
+
+context:
+  trigger: continuous
+  systems:
+    - Dapic ERP
+    - WhatsApp Cloud API (Meta)
+    - Instagram (futuro)
+    - E-commerce techmalhas.com.br (origem de leads e pedidos)
+    - Vercel (hospedagem)
+    - Supabase (PostgreSQL + Auth + Storage)
+  frequency: contínua (sistema em produção)
+
+tools_needed:
+  - web_search
+  - web_fetch
+
+investigation:
+  enabled: true
+  profiles:
+    - url: "https://pages.clint.digital/parceiro?utm_source=parceiros&utm_medium=comercial-pro"
+      platform: web
+      investigation_mode: deep_audit
+      type: reference_crm
+
+target_formats: []  # não é squad de conteúdo
+
+# Decisões da Tania na Discovery
+decisions:
+  approach: all_in_one  # squad único cobre audit + arquitetura + código
+  tech_stack: modern_code  # Next.js + Node + PostgreSQL
+  mvp_scope:
+    - "Pipeline Kanban (essencial)"
+    - "Cadastro de leads (essencial)"
+    - "Histórico de interações (essencial)"
+    - "Dashboard de indicadores"
+    - "Estratégia de funil (etapas configuráveis)"
+    - "Integração WhatsApp API Oficial (Meta Cloud API)"
+    - "Obrigatoriedade de tarefas para responsáveis (accountability)"
+    - "Base de referência: CRM Clint Digital"
+  hosting: cloud_vercel  # Vercel + Supabase
+  team_size: lean_5_agents  # consolidou Backend+Frontend em Full-Stack
+
+# Features fora do MVP (backlog futuro)
+out_of_scope_v1:
+  - Integração Instagram DM
+  - Disparos em massa (SMS, voz, WhatsApp)
+  - Agentes de IA conversacionais
+  - Integração com checkout/abandono de carrinho
+  - App mobile nativo
+  - Multitenancy
+  - Integração Dapic (avaliar viabilidade no Step 06; pode ficar fora do MVP)

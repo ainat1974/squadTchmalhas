@@ -1,0 +1,198 @@
+squad_code: crm-techmalhas
+squad_name: CRM Techmalhas
+squad_description: >
+  Squad multifuncional para construir o CRM próprio da Techmalhas em Next.js +
+  Supabase + Vercel, com pipeline Kanban, dashboard, integração WhatsApp Oficial
+  e obrigatoriedade de tarefas para responsáveis.
+icon: "🏗️"
+language: pt-BR
+domain: mixed
+
+agents:
+  - id: product-strategist
+    name: Patrícia Produto
+    title: Estrategista de Produto
+    icon: "🎯"
+    execution: subagent
+    responsibility: >
+      Auditar CRMs de referência (Clint Digital, RD Station, Pipedrive),
+      traduzir as features em requisitos para a Techmalhas, escrever user
+      stories com critérios de aceitação e priorizar o backlog do MVP.
+    runs_steps: [audit, requirements]
+
+  - id: ux-designer
+    name: Davi Designer
+    title: Designer UX/UI
+    icon: "🎨"
+    execution: subagent
+    responsibility: >
+      Desenhar wireframes textuais/ASCII das telas-chave (Kanban de pipeline,
+      detalhe de lead, dashboard, chat WhatsApp, gestão de tarefas) e definir
+      o design system (cores, tipografia, componentes shadcn customizados).
+    runs_steps: [wireframes, design-system]
+
+  - id: system-architect
+    name: Arnaldo Arquiteto
+    title: Arquiteto de Sistemas
+    icon: "🏗️"
+    execution: subagent
+    responsibility: >
+      Definir arquitetura completa: stack, modelo de dados (ERD), API spec,
+      módulos, integrações (WhatsApp Meta API, Dapic ERP), autenticação/RBAC,
+      conformidade LGPD e plano de deploy no Vercel.
+    runs_steps: [architecture]
+
+  - id: fullstack-developer
+    name: Fábio Fullstack
+    title: Desenvolvedor Full-Stack Next.js
+    icon: "💻"
+    execution: subagent
+    responsibility: >
+      Implementar schema PostgreSQL (Supabase), endpoints REST com Next.js API
+      Routes + Zod, integração WhatsApp Cloud API e toda a interface Next.js
+      (Kanban, Leads, Dashboard, Chat, Tasks) com Tailwind + shadcn/ui.
+    runs_steps: [database, backend-api, frontend]
+
+  - id: qa-documentation
+    name: Quésia Qualidade
+    title: QA e Documentação Técnica
+    icon: "🧪"
+    execution: subagent
+    responsibility: >
+      Escrever testes (unit + integration + e2e com Playwright), validar fluxos
+      end-to-end, executar deploy no Vercel e produzir documentação (guia do
+      usuário, guia do admin, README, manual de operação).
+    runs_steps: [integration, deploy-docs]
+
+pipeline:
+  - id: audit
+    label: Auditoria de CRMs de Referência
+    file: pipeline/steps/step-01-audit.md
+    execution: subagent
+    agent: product-strategist
+    model_tier: powerful
+    inputFile: null
+    outputFile: squads/crm-techmalhas/output/audit-report.md
+
+  - id: requirements
+    label: Requisitos e User Stories do MVP
+    file: pipeline/steps/step-02-requirements.md
+    execution: subagent
+    agent: product-strategist
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/audit-report.md
+    outputFile: squads/crm-techmalhas/output/requirements.md
+
+  - id: checkpoint-scope
+    label: ⏸️ Checkpoint — Aprovar Escopo do MVP
+    file: pipeline/steps/step-03-checkpoint-scope.md
+    type: checkpoint
+    outputFile: squads/crm-techmalhas/output/scope-decision.md
+
+  - id: wireframes
+    label: Wireframes das Telas-Chave
+    file: pipeline/steps/step-04-wireframes.md
+    execution: subagent
+    agent: ux-designer
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/requirements.md
+    outputFile: squads/crm-techmalhas/output/wireframes.md
+
+  - id: design-system
+    label: Design System (cores, tipografia, componentes)
+    file: pipeline/steps/step-05-design-system.md
+    execution: subagent
+    agent: ux-designer
+    model_tier: fast
+    inputFile: squads/crm-techmalhas/output/wireframes.md
+    outputFile: squads/crm-techmalhas/output/design-system.md
+
+  - id: architecture
+    label: Arquitetura de Sistemas e Modelo de Dados
+    file: pipeline/steps/step-06-architecture.md
+    execution: subagent
+    agent: system-architect
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/requirements.md
+    outputFile: squads/crm-techmalhas/output/architecture.md
+
+  - id: checkpoint-architecture
+    label: ⏸️ Checkpoint — Aprovar Arquitetura
+    file: pipeline/steps/step-07-checkpoint-architecture.md
+    type: checkpoint
+    outputFile: squads/crm-techmalhas/output/architecture-decision.md
+
+  - id: database
+    label: Schema do Banco (Postgres / Supabase)
+    file: pipeline/steps/step-08-database.md
+    execution: subagent
+    agent: fullstack-developer
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/architecture.md
+    outputFile: squads/crm-techmalhas/output/code/db-schema.md
+
+  - id: backend-api
+    label: API REST + Integração WhatsApp
+    file: pipeline/steps/step-09-backend-api.md
+    execution: subagent
+    agent: fullstack-developer
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/code/db-schema.md
+    outputFile: squads/crm-techmalhas/output/code/backend.md
+
+  - id: frontend
+    label: Interface Next.js (Kanban, Leads, Dashboard, Chat)
+    file: pipeline/steps/step-10-frontend.md
+    execution: subagent
+    agent: fullstack-developer
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/code/backend.md
+    outputFile: squads/crm-techmalhas/output/code/frontend.md
+
+  - id: integration
+    label: Testes de Integração End-to-End
+    file: pipeline/steps/step-11-integration.md
+    execution: subagent
+    agent: qa-documentation
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/code/frontend.md
+    outputFile: squads/crm-techmalhas/output/test-report.md
+
+  - id: deploy-docs
+    label: Deploy no Vercel + Documentação
+    file: pipeline/steps/step-12-deploy-docs.md
+    execution: subagent
+    agent: qa-documentation
+    model_tier: powerful
+    inputFile: squads/crm-techmalhas/output/test-report.md
+    outputFile: squads/crm-techmalhas/output/deployment-handoff.md
+
+  - id: checkpoint-final
+    label: ⏸️ Checkpoint — Revisão Final e Handoff
+    file: pipeline/steps/step-13-checkpoint-final.md
+    type: checkpoint
+    outputFile: squads/crm-techmalhas/output/final-acceptance.md
+
+checkpoints:
+  - id: checkpoint-scope
+    after: requirements
+    question: Aprova o escopo do MVP definido pela Patrícia Produto?
+
+  - id: checkpoint-architecture
+    after: architecture
+    question: Aprova a arquitetura técnica proposta pelo Arnaldo Arquiteto?
+
+  - id: checkpoint-final
+    after: deploy-docs
+    question: Aceita a entrega final do MVP?
+
+skills:
+  - web_search
+  - web_fetch
+
+data:
+  - pipeline/data/research-brief.md
+  - pipeline/data/domain-framework.md
+  - pipeline/data/quality-criteria.md
+  - pipeline/data/output-examples.md
+  - pipeline/data/anti-patterns.md

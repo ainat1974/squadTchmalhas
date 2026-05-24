@@ -1,0 +1,22 @@
+{
+  "squad": "crm-techmalhas",
+  "status": "done",
+  "step": { "current": 13, "total": 13, "label": "Concluído — Aprovado por Tania" },
+  "agents": [
+    { "id": "product-strategist", "name": "Patrícia Produto", "icon": "🎯", "status": "done", "desk": { "col": 1, "row": 1 } },
+    { "id": "ux-designer", "name": "Davi Designer", "icon": "🎨", "status": "done", "desk": { "col": 2, "row": 1 } },
+    { "id": "system-architect", "name": "Arnaldo Arquiteto", "icon": "🏗️", "status": "done", "desk": { "col": 3, "row": 1 } },
+    { "id": "fullstack-developer", "name": "Fábio Fullstack", "icon": "💻", "status": "done", "desk": { "col": 1, "row": 2 } },
+    { "id": "qa-documentation", "name": "Quésia Qualidade", "icon": "🧪", "status": "done", "desk": { "col": 2, "row": 2 } }
+  ],
+  "handoff": {
+    "from": "qa-documentation",
+    "to": "user",
+    "message": "Pipeline 100% concluído. 13/13 steps. 79/79 testes. Aprovado por Tania em 2026-05-24.",
+    "approvedBy": "Tania",
+    "completedAt": "2026-05-24T19:30:00Z",
+    "approvedAt": "2026-05-24T20:00:00Z"
+  },
+  "startedAt": "2026-05-24T16:24:35Z",
+  "updatedAt": "2026-05-24T20:00:00Z"
+}

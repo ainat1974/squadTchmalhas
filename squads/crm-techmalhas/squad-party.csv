@@ -1,0 +1,6 @@
+id,displayName,icon,path,execution,role
+product-strategist,Patrícia Produto,🎯,./agents/product-strategist.agent.md,subagent,Estrategista de Produto — auditoria comparativa, requisitos, user stories e backlog do MVP
+ux-designer,Davi Designer,🎨,./agents/ux-designer.agent.md,subagent,Designer UX/UI — wireframes, fluxos de usuário e design system da Techmalhas
+system-architect,Arnaldo Arquiteto,🏗️,./agents/system-architect.agent.md,subagent,Arquiteto de Sistemas — stack técnica, modelo de dados, integrações e LGPD
+fullstack-developer,Fábio Fullstack,💻,./agents/fullstack-developer.agent.md,subagent,Dev Full-Stack — implementa banco, API e UI em Next.js + Supabase
+qa-documentation,Quésia Qualidade,🧪,./agents/qa-documentation.agent.md,subagent,QA e Documentação — testes end-to-end, deploy no Vercel e guias do usuário

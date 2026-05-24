@@ -1,0 +1,111 @@
+code: crm-techmalhas
+name: CRM Techmalhas
+description: >
+  Squad multifuncional para auditar referências, arquitetar e construir o CRM
+  próprio da Techmalhas (Next.js + PostgreSQL + WhatsApp Cloud API + Vercel).
+  Baseado no benchmark do Clint Digital, com pipeline Kanban, dashboard,
+  estratégia de funil e obrigatoriedade de tarefas para responsáveis.
+icon: "🏗️"
+version: "1.0.0"
+created: "2026-05-24"
+domain: mixed
+language: pt-BR
+
+company:
+  name: Techmalhas
+  legal_name: RM Indústria e Comércio de Vestuário e Malhas LTDA
+  sector: Indústria + Comércio de Vestuário (Atacado + Varejo)
+  erp: Dapic
+  reference_crm: Clint Digital
+
+stack:
+  frontend: Next.js 15 + React 19 + TailwindCSS + shadcn/ui
+  backend: Next.js API Routes + TypeScript + Zod
+  database: PostgreSQL (Supabase)
+  hosting: Vercel
+  whatsapp: Meta Cloud API (WhatsApp Business Platform)
+  auth: Supabase Auth
+  compliance: LGPD
+
+skills:
+  - web_search
+  - web_fetch
+
+data:
+  - pipeline/data/research-brief.md
+  - pipeline/data/domain-framework.md
+  - pipeline/data/quality-criteria.md
+  - pipeline/data/output-examples.md
+  - pipeline/data/anti-patterns.md
+
+pipeline:
+  steps:
+    - id: audit
+      file: pipeline/steps/step-01-audit.md
+      label: Auditoria de CRMs de Referência
+      agent: product-strategist
+
+    - id: requirements
+      file: pipeline/steps/step-02-requirements.md
+      label: Requisitos e User Stories
+      agent: product-strategist
+
+    - id: checkpoint-scope
+      file: pipeline/steps/step-03-checkpoint-scope.md
+      label: ⏸️ Checkpoint — Aprovar Escopo do MVP
+      type: checkpoint
+
+    - id: wireframes
+      file: pipeline/steps/step-04-wireframes.md
+      label: Wireframes das Telas-Chave
+      agent: ux-designer
+
+    - id: design-system
+      file: pipeline/steps/step-05-design-system.md
+      label: Design System (cores, tipografia, componentes)
+      agent: ux-designer
+
+    - id: architecture
+      file: pipeline/steps/step-06-architecture.md
+      label: Arquitetura de Sistemas e Modelo de Dados
+      agent: system-architect
+
+    - id: checkpoint-architecture
+      file: pipeline/steps/step-07-checkpoint-architecture.md
+      label: ⏸️ Checkpoint — Aprovar Arquitetura
+      type: checkpoint
+
+    - id: database
+      file: pipeline/steps/step-08-database.md
+      label: Schema do Banco (Postgres / Supabase)
+      agent: fullstack-developer
+
+    - id: backend-api
+      file: pipeline/steps/step-09-backend-api.md
+      label: API REST + Integração WhatsApp
+      agent: fullstack-developer
+
+    - id: frontend
+      file: pipeline/steps/step-10-frontend.md
+      label: Interface Next.js (Kanban, Leads, Dashboard, Chat)
+      agent: fullstack-developer
+
+    - id: integration
+      file: pipeline/steps/step-11-integration.md
+      label: Testes de Integração End-to-End
+      agent: qa-documentation
+
+    - id: deploy-docs
+      file: pipeline/steps/step-12-deploy-docs.md
+      label: Deploy no Vercel + Documentação
+      agent: qa-documentation
+
+    - id: checkpoint-final
+      file: pipeline/steps/step-13-checkpoint-final.md
+      label: ⏸️ Checkpoint — Revisão Final e Handoff
+      type: checkpoint
+
+  checkpoints:
+    - checkpoint-scope
+    - checkpoint-architecture
+    - checkpoint-final
