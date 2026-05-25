@@ -42,3 +42,18 @@
 - **Auth:** Supabase Auth (e-mail + Google OAuth no MVP)
 - **Roles:** admin, gestor, vendedor (RBAC simples)
 - **Multitenancy:** não no MVP (uma instância para Techmalhas)
+
+## Modelo Operacional (ADR-007 — desde 2026-05-25)
+
+- **Fluxo:** Tania (PO) → Tutora (orquestradora) → Squad (5 especialistas + MCPs)
+- **Tania nunca fala direto com agentes** — tutora é único ponto de contato
+- **Tutora decide** quando executar direto (operações < 30min) vs quando delegar (decisões > 1h, implementações > 4h, validações antes de deploy)
+- **Agentes especializados:**
+  - 👩‍💼 `product-strategist` (Patrícia) — produto, requisitos, ROI
+  - 🎨 `ux-designer` (Davi) — wireframes, design system, UX
+  - 🏛️ `system-architect` (Arnaldo) — arquitetura, ADRs, decisões técnicas grandes
+  - 💻 `fullstack-developer` (Fábio) — implementação (DB, API, frontend)
+  - 🔬 `qa-documentation` (Quésia) — testes, QA, docs, segurança/LGPD
+- **MCPs operados pela tutora:** Vercel, Supabase, n8n, Playwright/Chrome DevTools
+- **Aprovações grandes:** qualquer decisão > 4h de dev ou que mexa em produção precisa de OK explícito da Tania antes da execução
+- **Memória:** toda decisão importante vira `.md` em `output/YYYY-MM-DD/` ou `_memory/`
