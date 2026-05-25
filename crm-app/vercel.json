@@ -1,16 +1,1 @@
-{
-  "crons": [
-    {
-      "path":     "/api/cron/lgpd-purge",
-      "schedule": "0 2 1 * *"
-    },
-    {
-      "path":     "/api/cron/whatsapp-retry",
-      "schedule": "0 3 * * *"
-    },
-    {
-      "path":     "/api/cron/webchat-expire",
-      "schedule": "0 4 * * *"
-    }
-  ]
-}
+{}
