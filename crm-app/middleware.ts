@@ -1,9 +1,9 @@
 /**
- * middleware.ts — Proteção de rotas (Next.js 16)
- * Usar middleware.ts (não proxy.ts): Turbopack 16.2.x gera manifest vazio com proxy.ts → 404 na Vercel.
+ * middleware.ts — Proteção de rotas (Edge Runtime)
+ * Código autocontido: imports de @/lib/* quebram o bundle Edge na Vercel.
  */
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
 
 const PREVIEW_MODE =
   process.env.PREVIEW_MODE === 'true' ||
@@ -20,6 +20,37 @@ function isPublicPath(pathname: string): boolean {
     pathname === '/login' ||
     pathname === '/auth/callback'
   )
+}
+
+async function updateSession(request: NextRequest) {
+  let response = NextResponse.next({ request })
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key || url.includes('placeholder')) {
+    return { response, user: null }
+  }
+
+  const supabase = createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll()
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        response = NextResponse.next({ request })
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options),
+        )
+      },
+    },
+  })
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  return { response, user }
 }
 
 export async function middleware(request: NextRequest) {
