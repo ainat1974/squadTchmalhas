@@ -566,11 +566,12 @@
   .channel-dot-instagram { background: hsl(var(--channel-instagram)); }
   .channel-dot-webchat   { background: hsl(var(--channel-webchat));   }
 
-  /* ─── 14b. BrandMark — monograma TM tipográfico ──────────────
-     Decisão Tania 2026-05-25 (pós-mockups v5):
-     - "TM" em Hind 700 destacado (fonte real do site, 2125× uso dominante)
-     - Cor gold #E79501 — acento real da marca, AAA no dark, amarra sistema visual
-     - Glow text-shadow só no dark; sem glow em light/print/avatar/favicon
+  /* ─── 14b. BrandMark — TM stacked sobre "CRM Techmalhas" ─────
+     Decisão Tania 2026-05-25 (pós-mockups v5, refinada 18:00):
+     - "TM" em Hind 700 gold #E79501 destacado (acento real da marca, AAA)
+     - "CRM Techmalhas" empilhado logo abaixo em Hind 500 off-white tracking-wider
+     - Glow text-shadow só no TM, só no dark
+     - Sem glow em light/print/avatar/favicon
      - Spec completa em design-system-v5.md §5.9
   */
   .brand-tm {
@@ -581,7 +582,6 @@
     color: var(--brand-gold);
     font-feature-settings: 'kern' 1, 'liga' 1;
     text-rendering: geometricPrecision;
-    /* default: sem glow (avatar/favicon usam .brand-tm puro) */
     text-shadow: none;
     transition: text-shadow 150ms var(--easing-decelerate);
   }
@@ -591,24 +591,37 @@
       0 0  4px rgb(var(--glow-gold) / 0.18);
   }
   .brand-tm-glow:hover,
-  a:hover > .brand-tm-glow,
-  button:hover > .brand-tm-glow {
+  a:hover .brand-tm-glow,
+  button:hover .brand-tm-glow {
     text-shadow:
       0 0 28px rgb(var(--glow-gold) / 0.50),
       0 0  6px rgb(var(--glow-gold) / 0.24);
   }
-  /* Light mode: gold em fundo branco já tem contraste — glow vira sujeira */
+  /* Light: gold em fundo branco já tem contraste; glow vira halo amarelado sujo */
   .light .brand-tm-glow {
     text-shadow: none;
   }
-  .brand-wordmark-rest {
+
+  /* Wordmark "CRM Techmalhas" empilhado sob o TM (decisão Tania 2026-05-25)
+     - Off-white (--text-primary) em ambos os temas — wordmark é identificação
+       de marca, precisa ser claramente legível, não decoração secundária
+     - Hind 500 (subordinação tipográfica ao TM 700)
+     - tracking aplicado inline pelo componente (varia por escala: 0.08em sidebar, 0.14em hero) */
+  .brand-wordmark-stack {
     font-family: var(--font-hind), 'Hind', system-ui, -apple-system, sans-serif;
     font-weight: 500;
-    color: hsl(var(--text-muted));
+    color: hsl(var(--text-primary));
     line-height: 1;
-    letter-spacing: -0.01em;
+    text-rendering: geometricPrecision;
+    font-feature-settings: 'kern' 1;
+    white-space: nowrap;
   }
-  /* Avatar fallback: TM em off-white, sem glow, círculo bg-elevated */
+  /* Print: wordmark vira ink para coerência monocromática */
+  @media print {
+    .brand-wordmark-stack { color: #141414; }
+  }
+
+  /* Avatar fallback: TM off-white em círculo bg-elevated (sem glow, sem wordmark) */
   .brand-tm-avatar {
     font-family: var(--font-hind), 'Hind', system-ui, -apple-system, sans-serif;
     font-weight: 700;

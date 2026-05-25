@@ -50,8 +50,9 @@ O login do v5 mantém o tom premium do v4 mas em dark mode. Em vez de bg branco 
 ▒              ═══════════════════════════════════════════                   ▒
 ▒              ███ bg-elevated #1C1D21 + inner-light    ███                  ▒
 ▒              ███                                       ███                 ▒
-▒              ███   ✦ TM ✦ CRM  ← BrandMark hero (40px gold+glow)███         ▒
-▒              ███      Hind 700 letter-spacing -0.04em  ███                  ▒
+▒              ███        ✦ TM ✦        ← 40px gold+glow Hind 700  ███       ▒
+▒              ███    CRM Techmalhas    ← 14px off-white Hind 500   ███      ▒
+▒              ███                        tracking 0.14em            ███     ▒
 ▒              ███                                       ███                 ▒
 ▒              ███  CRM Techmalhas              (h1)     ███                 ▒
 ▒              ███  Entre para continuar       (muted)   ███                 ▒
@@ -94,8 +95,9 @@ O login do v5 mantém o tom premium do v4 mas em dark mode. Em vez de bg branco 
 ▒  ⊙ mesh-gold top                ▒
 ▒                                 ▒
 ▒                                 ▒
-▒        ✦ TM ✦ CRM ← BrandMark   ▒
-▒        hero gold+glow Hind 700  ▒
+▒          ✦ TM ✦                 ▒  ← 40px gold+glow
+▒      CRM Techmalhas             ▒  ← 14px off-white Hind 500
+▒        tracking 0.14em           ▒    (stacked sob o TM)
 ▒                                 ▒
 ▒        CRM Techmalhas           ▒
 ▒        Entre para continuar     ▒
@@ -168,13 +170,15 @@ O login do v5 mantém o tom premium do v4 mas em dark mode. Em vez de bg branco 
 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
 ▒┌────────┬─────────────────────────────────────────────────────────────────┐▒
 ▒│▓▓▓▓▓▓▓▓│                                                                 │▒
-▒│▓ side ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
-▒│▓ bg-  ▓│ ▓ Dashboard                              [Hist. conversas]   ▓ │▒
-▒│▓ card ▓│ ▓ ··· filter-bar-sticky #16181C/96 ··············••••••••••• ▓ │▒
-▒│▓      ▓│ ▓ [📅 25/04 – 25/05][Pipeline: Atacado ▾][Vend: Todos ▾][Canal▾]▓│▒
-▒│▓✦TM ✦▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
-▒│▓echma- ▓│   ← BrandMark sidebar (TM 28px gold+glow Hind 700, "echmalhas" 14px muted) │▒
-▒│▓lhas   ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
+▒│▓✦TM ✦ ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
+▒│▓CRM Tch▓│ ▓ Dashboard                              [Hist. conversas]   ▓ │▒
+▒│▓malhas ▓│ ▓ ··· filter-bar-sticky #16181C/96 ··············••••••••••• ▓ │▒
+▒│▓       ▓│ ▓ [📅 25/04 – 25/05][Pipeline: Atacado ▾][Vend: Todos ▾][Canal▾]▓│▒
+▒│▓ side- ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
+▒│▓ bar   ▓│  ← BrandMark sidebar STACKED no topo:                          │▒
+▒│▓ bg-   ▓│      · TM 28px gold+glow Hind 700                              │▒
+▒│▓ card  ▓│      · "CRM Techmalhas" 10px off-white Hind 500 tracking 0.08em│▒
+▒│▓       ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
 ▒│▓      ▓│ ▓ Resultados de vendas                                       ▓ │▒
 ▒│▓ ●Dash▓│ ▓┌──────────┐┌──────────┐┌──────────┐╔══════════╗            ▓│▒
 ▒│▓  Pipe▓│ ▓│RECEITA   ││TICKET MD ││CONV. RATE││PIPELINE  ║ ← elevated ▓│▒
@@ -803,51 +807,58 @@ Comunicação ao vivo. **3-panel layout** (sidebar nav esquerda + lista conversa
 - Mobile: `top-center` (não colide com bottom nav).
 - Variants dark: success (left border `--metric-positive`), warning (`--action-warning`), error (`--metric-negative`), info (`--chart-primary`).
 
-## E. BrandMark — monograma TM tipográfico (decisão Tania 2026-05-25)
+## E. BrandMark — TM stacked sobre "CRM Techmalhas" (decisão Tania 2026-05-25, refinada 18:00)
 
 > **Especificação completa:** ver `design-system-v5.md` §5.9 `BrandMark` / `TechmalhasLogo`.
-> **Decisão:** monograma deixa de ser "T" em quadrado e passa a ser **"TM" em Hind 700** (fonte real do site, 2125× uso dominante). Cor: **gold `#E79501`** (acento real da marca, AAA contraste no dark, amarra TM com FAB + primary CTA + ring focus). Glow `text-shadow` 24px gold 35% no dark; sem glow no light/print/avatar.
+> **Decisão final:** lockup vertical com **TM gold em cima** + **"CRM Techmalhas" off-white empilhado logo abaixo** (não inline). TM em Hind 700 letter-spacing -0.04em gold `#E79501` com glow no dark; wordmark "CRM Techmalhas" em Hind 500 off-white `--text-primary` com tracking-wider (`0.14em` no hero, `0.08em` na sidebar). Sidebar collapsed e favicon mostram **só o TM** (sem wordmark — falta espaço).
 
-| Variante | Onde aparece | Tipografia | Cor | Glow | Sufixo |
-|---|---|---|---|---|---|
-| **`hero`** | Login centro do card (40px) | Hind 700 letter-spacing -0.04em | gold `#E79501` | ✅ sim | "CRM" 12px uppercase tracking-wide |
-| **`sidebar`** | Sidebar expanded 240px (28px) | Hind 700 letter-spacing -0.04em | gold `#E79501` | ✅ sim | "echmalhas" 14px `--text-muted` |
-| **`sidebar-collapsed`** | Sidebar collapsed 64px (32px) | Hind 700 letter-spacing -0.04em | gold `#E79501` | ✅ sim | — |
-| **`mark`** | Favicon, ícone PWA (32px SVG) | Hind 700 (SVG `<text>` ou path) | gold `#E79501` sobre canvas `#0A0B0D` rounded 6px | ❌ não (raster pequeno) | — |
-| **`avatar`** | Avatar fallback (LeadCard sem foto, 20px em círculo `bg-elevated`) | Hind 700 letter-spacing -0.04em | `--text-primary` off-white | ❌ não (não competir com avatares reais de clientes) | — |
-| **`print`** | Relatórios impressos do dashboard | Hind 700 | ink `#141414` | ❌ não | "echmalhas" `#666666` |
+| Variante | Onde aparece | TM | Wordmark "CRM Techmalhas" | Glow TM |
+|---|---|---|---|---|
+| **`hero`** | Login centro do card | 40px Hind 700 gold | 14px Hind 500 off-white tracking 0.14em | ✅ sim |
+| **`sidebar`** | Sidebar expanded 240px | 28px Hind 700 gold | 10px Hind 500 off-white tracking 0.08em | ✅ sim |
+| **`sidebar-collapsed`** | Sidebar collapsed 64px | 32px Hind 700 gold | — (sem espaço) | ✅ sim |
+| **`mark`** | Favicon, ícone PWA (SVG 32×32) | 16px Hind 700 gold sobre rounded-square dark | — | ❌ não (raster pequeno) |
+| **`avatar`** | LeadCard sem foto (círculo 40px `bg-elevated`) | 20px Hind 700 off-white | — | ❌ não (não rouba foco em listas) |
+| **`print`** | Relatórios impressos | Ink `#141414` | Ink `#141414` (monocromático) | ❌ não |
 
-### Anatomia visual do BrandMark
+### Anatomia visual do BrandMark v5 (TM stacked sobre wordmark)
 
 ```
-hero (login):                sidebar expanded:           sidebar collapsed:
-┌─────────────────┐         ┌──────────────────┐        ┌──────┐
-│                 │         │                  │        │      │
-│  ✦ TM ✦         │         │ ✦TM ✦echmalhas   │        │ ✦TM✦ │
-│       CRM       │         │ 28px gold  14px  │        │ 32px │
-│   12px muted    │         │ +glow     muted  │        │ +glow│
-│                 │         └──────────────────┘        └──────┘
-└─────────────────┘
-40px gold +glow
+hero (login, 40px TM):              sidebar expanded (28px TM):       sidebar collapsed (32px TM):
+┌─────────────────────┐             ┌──────────────────────┐          ┌──────┐
+│                     │             │                      │          │      │
+│      ✦ TM ✦         │  ← gold     │      ✦ TM ✦          │ ← gold   │ ✦TM✦ │ ← gold
+│  CRM Techmalhas     │  ← off-     │   CRM Techmalhas     │ ← off-   │ 32px │
+│  tracking 0.14em    │     white   │   tracking 0.08em    │   white  │+glow │
+│                     │     14px    │   10px Hind 500      │   10px   └──────┘
+└─────────────────────┘     500     └──────────────────────┘
+gap vertical 6px                    gap vertical 2px
 
-avatar fallback (LeadCard sem foto):     favicon (32×32 SVG):
-┌────────┐                              ┌────┐
-│ ╭────╮ │                              │TM  │  ← gold sobre rounded-square dark
-│ │ TM │ │  ← 20px off-white,            │ TM │     16px, sem glow (raster)
-│ ╰────╯ │     SEM glow                   │    │
-│ círculo │     (não rouba foco           └────┘
-│ bg-elev │      em listas)
-└────────┘
+avatar fallback (20px TM):          favicon (SVG 32×32):
+┌────────┐                          ┌──────┐
+│ ╭────╮ │                          │  TM  │  ← gold sobre rounded-square dark #0A0B0D
+│ │ TM │ │ ← 20px off-white         │      │     16px, sem glow (raster pequeno)
+│ ╰────╯ │   SEM glow,              │      │     SEM wordmark
+│ bg-elev│   SEM wordmark           └──────┘
+└────────┘   (placeholder em listas
+             — não competir com
+             avatares reais)
 ```
 
-### Por quê gold (e não teal-sage ou gradiente)
+### Por quê gold no TM (e não teal-sage ou gradiente)
 
 Davi avaliou 3 opções com WCAG e contexto de marca:
 - **Gold `#E79501` ✅ escolhida** — 8.0:1 AAA, **é** o acento real do site (estrelas, "mais vendidos"), amarra TM ao sistema visual (FAB, primary, ring).
 - Teal-sage `#5BA89A` — 5.2:1 AA, mas é **derivado** para charts; sage no site é **muted** por intenção, contradiz semântica.
 - Gradiente gold→teal-sage — viraria visual "tech startup AI"; Techmalhas é editorial/atemporal.
 
-Decisão registrada em `design-system-v5.md` §5.9.1 e `adr-010-design-system-v5-dark.md` D8.
+### Por quê wordmark monocromático off-white (e não bicolor "CRM" gold + "Techmalhas" branco)
+
+Davi avaliou 2 opções para o tratamento do wordmark:
+- **Off-white monocromático ✅ escolhida** — hierarquia clara símbolo > wordmark; padrão clássico de lockup (símbolo colorido + wordmark monocromático: Apple, Nike, Pirelli); sem competição cromática com o TM gold; leitura unitária de "CRM Techmalhas".
+- Bicolor "CRM" gold + "Techmalhas" branco — rejeitada porque "CRM" gold competiria com o "TM" gold acima (2 elementos dourados na mesma microárea → quebra regra "1 acento gold por composição local") e fragmentaria a leitura do wordmark.
+
+Decisão registrada em `design-system-v5.md` §5.9.1 e §5.9.6, e em `adr-010-design-system-v5-dark.md` D8.
 
 ## F. ThemeToggle (UserMenu)
 

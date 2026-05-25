@@ -578,9 +578,9 @@ Atalho de teclado **N** (não conflita com nada existente).
 
 ---
 
-### 5.9 `BrandMark` / `TechmalhasLogo` (monograma TM tipográfico)
+### 5.9 `BrandMark` / `TechmalhasLogo` (monograma TM + wordmark stacked)
 
-> **Decisão Tania 2026-05-25 (pós-mockups v5):** o monograma do CRM deixa de ser um "T" genérico em quadrado e passa a ser **"TM" em Hind 700 destacado** — coerência absoluta com a marca real (Hind é a fonte do site, 2125× uso dominante na auditoria). Davi decidiu, com liberdade consciente, usar **gold `#E79501`** como cor de destaque das letras (justificativa abaixo).
+> **Decisão Tania 2026-05-25 (pós-mockups v5, refinada às 18:00):** o monograma do CRM deixa de ser um "T" genérico em quadrado e passa a ser **"TM" em Hind 700 gold destacado** com **"CRM Techmalhas" empilhado logo abaixo** como wordmark — coerência absoluta com a marca real (Hind é a fonte do site, 2125× uso dominante na auditoria). Davi decidiu, com liberdade consciente, usar **gold `#E79501`** no TM (justificativa em §5.9.1) e **off-white `--text-primary` Hind 500 tracking-wider** no wordmark "CRM Techmalhas" (justificativa em §5.9.6 — opção A monocromática venceu vs gold-bicolor).
 
 #### 5.9.1 Justificativa da cor (gold venceu vs teal-sage e gradiente)
 
@@ -603,15 +603,17 @@ Atalho de teclado **N** (não conflita com nada existente).
 | `line-height` | `1` | Monograma centra verticalmente sem "respirar" |
 | `text-rendering` | `geometricPrecision` | Bordas mais limpas em tamanhos grandes |
 
-#### 5.9.3 Escala de tamanhos (5 contextos)
+#### 5.9.3 Escala de tamanhos (5 contextos — TM **stacked** sobre "CRM Techmalhas")
 
-| Contexto | Tamanho TM | Tamanho wordmark | Layout |
-|---|---|---|---|
-| **Favicon** (browser tab, ícone PWA) | 16px (compõe SVG 32×32) | — | Só TM, centralizado em quadrado com canto arredondado 4px |
-| **Sidebar collapsed** (largura 64px) | 32px | — | Só TM, centralizado |
-| **Sidebar expanded** (largura 240px) | 28px | "echmalhas" 14px muted | TM + "echmalhas" inline (não "Techmalhas" inteiro — TM já é o "T") |
-| **Login hero** (centro do card) | 40px | "CRM" 12px muted uppercase tracking-wide | TM em destaque + "CRM" como product badge abaixo |
-| **Avatar fallback** (LeadCard sem foto) | 20px | — | TM em círculo `bg-elevated` 40px (sem glow nesta variante — não competir com avatar de cliente) |
+| Contexto | TM | Wordmark "CRM Techmalhas" | Tracking wordmark | Gap vertical | Layout |
+|---|---|---|---|---|---|
+| **Favicon** (browser tab, ícone PWA) | 16px (compõe SVG 32×32) | — | — | — | Só TM, centralizado em quadrado com canto arredondado 6px |
+| **Sidebar collapsed** (largura 64px) | 32px | — | — | — | Só TM, centralizado (sem wordmark — falta espaço) |
+| **Sidebar expanded** (largura 240px) | 28px | 10px Hind 500 off-white | `0.08em` (tighter @ 10px p/ não quebrar) | 2px | TM em cima, "CRM Techmalhas" abaixo, **flex-col items-center** |
+| **Login hero** (centro do card) | 40px | 14px Hind 500 off-white | `0.14em` (wide elegante) | 6px | TM em cima, "CRM Techmalhas" abaixo, **flex-col items-center** |
+| **Avatar fallback** (LeadCard sem foto) | 20px | — | — | — | TM em círculo `bg-elevated` 40px (sem glow, sem wordmark — placeholder neutro) |
+
+> **Regra de proporção:** wordmark ≈ 35% da altura do TM, mantendo unidade visual (TM domina, wordmark identifica). Em sidebar collapsed e favicon, wordmark é omitido porque o espaço não comporta sem ficar ilegível.
 
 #### 5.9.4 Tratamento visual (glow gold sutil)
 
@@ -631,68 +633,65 @@ Em **fundos dark** (canvas/card/elevated), TM recebe **text-shadow glow** muito 
 - Favicon (raster pequeno — glow some na compressão)
 - Light mode (gold em fundo branco já tem contraste suficiente; glow vira "halo amarelado" sujo)
 
-#### 5.9.5 Componente React/TSX (pronto para Fábio)
+#### 5.9.5 Componente React/TSX (pronto para Fábio — TM stacked sobre "CRM Techmalhas")
 
 ```tsx
 // crm-app/components/brand/BrandMark.tsx
 import { cn } from '@/lib/utils'
 
 type BrandMarkProps = {
-  /** Variante de layout */
+  /** Variante de layout — controla tamanhos e se renderiza wordmark */
   variant?: 'mark' | 'sidebar' | 'sidebar-collapsed' | 'hero' | 'avatar'
-  /** Sufixo opcional ("echmalhas" para wordmark completo, "CRM" para badge de produto) */
-  suffix?: 'echmalhas' | 'CRM' | null
-  /** Aplica glow gold (default: true exceto em avatar/favicon) */
+  /** Aplica glow gold no TM (default: true exceto em avatar/favicon) */
   glow?: boolean
+  /** Wordmark "CRM Techmalhas" visível (default: true em sidebar/hero) */
+  showWordmark?: boolean
   className?: string
 }
 
 const sizeMap = {
-  'mark':              { tm: 32, suffix: 0,  gap: 0 },
-  'sidebar':           { tm: 28, suffix: 14, gap: 2 },
-  'sidebar-collapsed': { tm: 32, suffix: 0,  gap: 0 },
-  'hero':              { tm: 40, suffix: 12, gap: 6 },
-  'avatar':            { tm: 20, suffix: 0,  gap: 0 },
-}
+  'mark':              { tm: 32, wordmark: 0,  tracking: '0em',    gap: 0, showWordmark: false },
+  'sidebar':           { tm: 28, wordmark: 10, tracking: '0.08em', gap: 2, showWordmark: true  },
+  'sidebar-collapsed': { tm: 32, wordmark: 0,  tracking: '0em',    gap: 0, showWordmark: false },
+  'hero':              { tm: 40, wordmark: 14, tracking: '0.14em', gap: 6, showWordmark: true  },
+  'avatar':            { tm: 20, wordmark: 0,  tracking: '0em',    gap: 0, showWordmark: false },
+} as const
 
 export function BrandMark({
   variant = 'sidebar',
-  suffix = variant === 'sidebar' ? 'echmalhas' : variant === 'hero' ? 'CRM' : null,
   glow,
+  showWordmark,
   className,
 }: BrandMarkProps) {
   const sizes = sizeMap[variant]
-  const showGlow = glow ?? (variant !== 'avatar')
+  const renderGlow = glow ?? (variant !== 'avatar' && variant !== 'mark')
+  const renderWordmark = showWordmark ?? sizes.showWordmark
 
   return (
     <span
-      className={cn('inline-flex items-baseline', className)}
+      className={cn('inline-flex flex-col items-center', className)}
       style={{ gap: sizes.gap }}
-      aria-label="Techmalhas"
+      role="img"
+      aria-label="CRM Techmalhas"
     >
       <span
-        className={cn('brand-tm', showGlow && 'brand-tm-glow')}
+        className={cn('brand-tm', renderGlow && 'brand-tm-glow')}
         style={{ fontSize: sizes.tm, lineHeight: 1 }}
         aria-hidden="true"
       >
         TM
       </span>
-      {suffix === 'echmalhas' && (
+      {renderWordmark && (
         <span
-          className="brand-wordmark-rest"
-          style={{ fontSize: sizes.suffix, lineHeight: 1 }}
+          className="brand-wordmark-stack"
+          style={{
+            fontSize: sizes.wordmark,
+            letterSpacing: sizes.tracking,
+            lineHeight: 1,
+          }}
           aria-hidden="true"
         >
-          echmalhas
-        </span>
-      )}
-      {suffix === 'CRM' && (
-        <span
-          className="brand-wordmark-rest uppercase tracking-[0.18em]"
-          style={{ fontSize: sizes.suffix, lineHeight: 1 }}
-          aria-hidden="true"
-        >
-          CRM
+          CRM Techmalhas
         </span>
       )}
     </span>
@@ -703,32 +702,49 @@ export function BrandMark({
 **Uso:**
 
 ```tsx
-// Sidebar expanded
-<BrandMark variant="sidebar" />               // → "TMechmalhas" inline
+// Login hero (centro do card)
+<BrandMark variant="hero" />
+// → TM 40px gold+glow
+//   CRM Techmalhas 14px off-white tracking 0.14em
 
-// Sidebar collapsed
-<BrandMark variant="sidebar-collapsed" />     // → "TM" 32px
+// Sidebar expanded (240px)
+<BrandMark variant="sidebar" />
+// → TM 28px gold+glow
+//   CRM Techmalhas 10px off-white tracking 0.08em
 
-// Login hero
-<BrandMark variant="hero" />                  // → "TM" 40px + "CRM" abaixo
+// Sidebar collapsed (64px)
+<BrandMark variant="sidebar-collapsed" />
+// → TM 32px (sem wordmark — sem espaço)
 
-// Avatar fallback (sem cliente foto)
-<BrandMark variant="avatar" glow={false} />   // → "TM" 20px em círculo
+// Avatar fallback (lista de leads sem foto)
+<BrandMark variant="avatar" />
+// → TM 20px off-white em círculo bg-elevated (sem glow, sem wordmark)
 ```
 
-#### 5.9.6 Regras de wordmark (quando "echmalhas" vs "CRM" vs nada)
+#### 5.9.6 Justificativa do tratamento monocromático off-white (opção A venceu vs bicolor)
 
-| Contexto | Sufixo | Razão |
+Davi avaliou 2 opções para o wordmark "CRM Techmalhas":
+
+| Opção | Tratamento | Pró | Contra | Veredito |
+|---|---|---|---|---|
+| **A) Monocromático off-white** ✅ | Tudo "CRM Techmalhas" em Hind 500, `--text-primary` (off-white `#F5F6F7`), `tracking-wider 0.14em` no hero / `0.08em` na sidebar | Hierarquia clara: TM gold é **o símbolo**; wordmark é identificação subordinada. Padrão clássico de lockup (símbolo colorido + wordmark monocromático — Apple, Nike, Pirelli). Sem competição cromática com o TM. Funciona idêntico em hero/sidebar. | Pode parecer "plano" se o wordmark ficar muito grande — mitigado mantendo ≈ 35% da altura do TM | **Escolhida** |
+| B) Bicolor ("CRM" gold + "Techmalhas" branco) | `"CRM"` em gold + espaço + `"Techmalhas"` em off-white | Separa visualmente "produto" de "marca-mãe" | **Problema crítico:** "CRM" gold compete com o "TM" gold acima → 2 elementos dourados na mesma microárea visual; o olho não sabe onde pousar. Quebra a regra de design "1 elemento dourado por composição local". Adicionalmente, fragmenta a leitura de "CRM Techmalhas" como **unidade**. | Rejeitada |
+
+**Conclusão Davi:** opção A é a única que respeita (1) hierarquia símbolo > wordmark, (2) regra de "1 acento gold por composição local", (3) leitura unitária de "CRM Techmalhas". Decisão consciente, registrada.
+
+#### 5.9.7 Regras de quando renderizar wordmark
+
+| Contexto | Wordmark? | Razão |
 |---|---|---|
-| Sidebar expanded em qualquer rota | `"echmalhas"` | Reforça marca; usuário lê uma vez por sessão |
-| Sidebar collapsed | nenhum | Falta espaço |
-| Login hero | `"CRM"` | Diferencia "este é o CRM da Techmalhas" do site público |
-| Header sticky de página interna | nenhum | Sidebar já mostra a marca; header foca no contexto da página |
-| Avatar fallback | nenhum | É um placeholder, não branding |
-| Favicon | nenhum | 16px não comporta sufixo |
-| Email transactional (futuro) | `"echmalhas"` | Reforço de marca fora do app |
+| Login hero | ✅ "CRM Techmalhas" | Primeira impressão da marca — identificação completa do produto |
+| Sidebar expanded em qualquer rota | ✅ "CRM Techmalhas" | Reforça marca em uso prolongado; ocupa o pequeno espaço sob o TM elegantemente |
+| Sidebar collapsed (64px) | ❌ | Sem espaço; só TM 32px |
+| Header sticky de página interna | ❌ | Sidebar já carrega a marca; header foca em contexto/filtros |
+| Avatar fallback | ❌ | Placeholder neutro, não branding |
+| Favicon (32×32 SVG) | ❌ | 16px de TM ocupa todo o espaço legível |
+| Email transactional (futuro) | ✅ | Reforço fora do app, contexto cross-channel |
 
-#### 5.9.7 SVG favicon (32×32 com TM Hind)
+#### 5.9.8 SVG favicon (32×32 com TM Hind — sem wordmark)
 
 Como Hind não está disponível em fontes de sistema do browser para favicon raster, o favicon embute o texto **diretamente como SVG path** (converter "TM" em Hind 700 para path no Figma/Illustrator e exportar). Enquanto o asset definitivo não fica pronto, usar SVG com `<text>` (Hind via Google Fonts não funciona em favicon — fallback para `system-ui` é aceitável apenas em transição):
 
@@ -751,18 +767,20 @@ Como Hind não está disponível em fontes de sistema do browser para favicon ra
 
 **Etapa polish (pós-launch, opcional):** converter "TM" em `<path d="...">` via Figma (mais robusto em browsers sem Hind disponível como fallback).
 
-#### 5.9.8 Variantes light/dark/print
+#### 5.9.9 Variantes light/dark/print
 
-| Tema | TM color | Glow | Wordmark color |
+| Tema | TM color | Glow no TM | Wordmark "CRM Techmalhas" color |
 |---|---|---|---|
-| **Dark** (default) | `#E79501` gold | `text-shadow` 24px gold 35% | `--text-muted` `#A8AFB8` |
-| **Light** (opt-in) | `#E79501` gold | ❌ sem glow (halo amarelado em fundo branco vira sujeira) | `--text-muted` light `#666666` |
-| **Print** (papel) | `#141414` ink | ❌ | `#666666` cinza |
-| **Avatar fallback** (ambos) | `--text-primary` (off-white dark / ink light) | ❌ | — |
+| **Dark** (default) | `#E79501` gold | `text-shadow` 24px gold 35% | `--text-primary` `#F5F6F7` off-white |
+| **Light** (opt-in) | `#E79501` gold | ❌ sem glow (halo amarelado em fundo branco vira sujeira) | `--text-primary` light `#141414` ink |
+| **Print** (papel) | `#141414` ink | ❌ | `#141414` ink (mesma cor — leitura limpa em monocromático) |
+| **Avatar fallback** (ambos) | `--text-primary` (off-white dark / ink light) | ❌ | — (sem wordmark) |
+
+**Por que wordmark é `--text-primary` (off-white) e não `--text-muted`?** Wordmark é **identificação de marca**, não metadado — precisa ser claramente legível, não decoração secundária. Off-white sobre canvas dark dá 17.8:1 AAA; muted daria 9.8:1 AAA também, mas em 10-14px o muted começa a "sumir" visualmente. Marca não pode sumir.
 
 **Por que avatar fallback não é gold?** Avatar fallback aparece **lado a lado com avatares reais de clientes** em listas/Kanban — se cada "TM" virasse uma estrela dourada, viraria o foco visual da lista. Em avatar fallback, TM é **placeholder neutro**.
 
-#### 5.9.9 Estados
+#### 5.9.10 Estados
 
 | Estado | Visual |
 |---|---|
