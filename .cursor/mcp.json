@@ -3,6 +3,28 @@
     "playwright": {
       "command": "npx",
       "args": ["@playwright/mcp@latest", "--config", "_opensquad/config/playwright.config.json"]
+    },
+    "vercel": {
+      "url": "https://mcp.vercel.com"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--read-only",
+        "--project-ref=ipmznhtviwxjvbjjuvxf"
+      ]
+    },
+    "n8n": {
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "_opensquad/scripts/start-n8n-mcp.ps1"
+      ]
     }
   }
 }
