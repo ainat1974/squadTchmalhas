@@ -1,0 +1,940 @@
+# Patch CSS v5 — `crm-app/app/globals.css` (Dark-First)
+
+> **Autor:** Davi Designer · **Data:** 2026-05-25
+> **Target:** Fábio Fullstack (substituir arquivo inteiro — mais seguro que StrReplace por bloco)
+> **Companions:** `design-system-v5.md`, `wireframes-v5.md`, `migration-plan-v5.md`
+> **Substitui:** `globals-css-v4.patch.md` (light-first)
+> **Mudança crítica:** dark mode é DEFAULT (`:root` é dark; `.light` é opt-in). Reaproveita 100% das utilities v4 (`.surface-premium`, `.skeleton-shimmer`, `.bg-hero-mesh`, `.input-focus-glow`, `.font-kpi`) com ajustes de tokens.
+
+---
+
+## Resumo das mudanças vs v4
+
+| Bloco | Mudança |
+|---|---|
+| `:root` | Agora é **DARK** (canvas `#0A0B0D`, card `#141414`, primary gold). Tokens v4 que eram dark agora são default |
+| `.light` | Nova classe — versão **light** (era o `:root` do v4) |
+| `--bg-canvas`, `--bg-card`, `--bg-elevated`, `--bg-sunken` | **Novos tokens** de surfaces dark layered |
+| `--text-primary`, `--text-secondary`, `--text-muted`, `--text-disabled` | Novos tokens de hierarquia tipográfica |
+| `--metric-positive`, `--metric-negative`, `--metric-neutral` | Novos tokens de métricas (verde/vermelho neon p/ dark) |
+| `--chart-primary`, `--chart-secondary`, `--chart-tertiary`, `--chart-grid`, `--chart-axis-text` | Novos tokens de chart |
+| `--border-sutil`, `--border-strong`, `--border-gold-soft` | Borders calibrados para dark |
+| `--inner-highlight` | Inset shadow 4% white (dark) / 65% white (light) |
+| `--channel-*` | Tokens lifted para dark (verde WA mais brilhante, roxo IG mais claro, azul WC mais claro) |
+| `--stage-*` | Stage colors com versão dark (chip bg 16% opacity da cor + texto cor pura) |
+| `@layer utilities` | + `.card-default`, `.card-interactive`, `.card-feature`, `.fab-gold`, `.tag-pill`, `.tag-pill-warm`, `.filter-bar-sticky`, `.pulse-live`, `.skeleton-shimmer-dark`, `.sparkline-path` |
+| Removido | Nada do v4 — todas as utilities v4 permanecem (compatibilidade total) |
+
+---
+
+## Arquivo completo após patch (substituir 100%)
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =================================================================
+   CRM Techmalhas — globals.css v5
+   Dark-first inspirado em referência analítica (Tania, 2026-05-25)
+   Paleta da marca Techmalhas + chart palette derivada + 4 surfaces layered
+   SEM glassmorphism (paridade cross-device mantida)
+   ================================================================= */
+
+@layer base {
+  /* :root = DARK (default v5). Use .light para opt-in light mode. */
+  :root {
+    /* ─── Surfaces dark (4 layers de profundidade) ─────────────── */
+    --bg-canvas:           220 7% 4%;          /* #0A0B0D body */
+    --bg-card:             0 0% 8%;            /* #141414 = brand-ink (cards) */
+    --bg-elevated:         225 5% 12%;         /* #1C1D21 (drawer/popover/feature) */
+    --bg-sunken:           220 7% 6%;          /* #0E0F12 (inputs/chips) */
+    --bg-overlay:          0 0% 0% / 0.72;     /* modal overlay sólido */
+
+    /* ─── Texto (hierarquia dark) ─────────────────────────────── */
+    --text-primary:        210 10% 96%;        /* #F5F6F7 off-white */
+    --text-secondary:      213 11% 82%;        /* #C9CED5 */
+    --text-muted:          210 8% 69%;         /* #A8AFB8 sage-cool */
+    --text-disabled:       217 7% 39%;         /* #5C636D */
+
+    /* ─── shadcn tokens (HSL "H S% L%") — DARK como default ──── */
+    --background:           220 7% 4%;          /* = bg-canvas */
+    --foreground:           210 10% 96%;        /* = text-primary */
+
+    --card:                 0 0% 8%;            /* = bg-card */
+    --card-foreground:      210 10% 96%;
+
+    --popover:              225 5% 12%;         /* = bg-elevated */
+    --popover-foreground:   210 10% 96%;
+
+    /* Primary = brand-gold no dark (ink sobre canvas dark some) */
+    --primary:              39 99% 46%;         /* #E79501 */
+    --primary-foreground:   0 0% 8%;            /* #141414 ink */
+
+    --secondary:            225 5% 12%;         /* = bg-elevated */
+    --secondary-foreground: 213 11% 82%;
+
+    --muted:                220 7% 6%;          /* = bg-sunken */
+    --muted-foreground:     210 8% 69%;         /* = text-muted */
+
+    --accent:               39 99% 46%;
+    --accent-foreground:    0 0% 8%;
+
+    --destructive:          11 75% 59%;         /* #E5614A metric-negative */
+    --destructive-foreground: 0 0% 100%;
+
+    --border:               0 0% 100% / 0.06;   /* border-sutil hsla */
+    --input:                220 7% 6%;          /* = bg-sunken */
+    --ring:                 39 99% 46%;         /* gold */
+
+    --radius:               0.75rem;            /* aumentado de 0.5rem v4 */
+
+    /* ─── Métricas (positivo/negativo neon para dark) ────────── */
+    --metric-positive:        146 65% 54%;       /* #3DD58C */
+    --metric-positive-soft:   146 65% 54% / 0.14;
+    --metric-negative:        11 75% 59%;        /* #E5614A */
+    --metric-negative-soft:   11 75% 59% / 0.14;
+    --metric-neutral:         210 8% 69%;        /* = text-muted */
+
+    /* ─── Chart palette (derivada da marca + dark optimized) ── */
+    --chart-primary:          166 30% 51%;       /* #5BA89A teal-sage */
+    --chart-primary-glow:     166 30% 51% / 0.18;
+    --chart-secondary:        39 99% 46%;        /* = brand-gold */
+    --chart-tertiary:         257 30% 67%;       /* #9C8FC9 lavanda muted */
+    --chart-grid:             0 0% 100% / 0.04;
+    --chart-axis-text:        210 8% 69%;        /* = text-muted */
+
+    /* ─── Borders calibrados ──────────────────────────────────── */
+    --border-sutil:           hsla(0, 0%, 100%, 0.06);
+    --border-strong:          hsla(0, 0%, 100%, 0.12);
+    --border-gold-soft:       hsla(39, 99%, 46%, 0.18);
+
+    /* ─── Inner highlight (fake 3D) ───────────────────────────── */
+    --inner-highlight:        inset 0 1px 0 hsla(0, 0%, 100%, 0.04);
+
+    /* ─── Brand core (mantido v4 — DNA da marca) ─────────────── */
+    --brand-ink:               #141414;
+    --brand-ink-hover:         #000000;
+    --brand-paper:             #FFFFFF;
+    --brand-gold:              #E79501;
+    --brand-gold-hover:        #FFA61F;        /* lifted no dark */
+    --brand-gold-light:        #FFF5E1;
+    --brand-sage:              #869791;
+    --brand-sage-hover:        #6F7F7B;
+    --brand-sage-light:        #EEF2F0;
+    --brand-terracotta:        #CC4833;
+    --brand-terracotta-hover:  #A83A28;
+    --brand-terracotta-light:  #FBE5E0;
+
+    /* ─── Channel colors (lifted para dark, mantidos light) ─── */
+    --channel-whatsapp:        142 71% 45%;     /* #22C55E (mais brilhante que light #16A34A) */
+    --channel-instagram:       284 64% 65%;     /* #C26BE5 (lift do roxo IG) */
+    --channel-webchat:         217 91% 67%;     /* #60A5FA (lift do azul) */
+
+    /* ─── Pipeline stage colors (versão dark — chip bg 16%) ─── */
+    --stage-new:               210 8% 69%;      /* = text-muted */
+    --stage-new-bg:            210 8% 69% / 0.16;
+    --stage-contact:           217 91% 67%;     /* azul */
+    --stage-contact-bg:        217 91% 67% / 0.16;
+    --stage-proposal:          39 87% 60%;      /* amber */
+    --stage-proposal-bg:       39 87% 60% / 0.16;
+    --stage-negotiation:       22 100% 62%;     /* #FF8B3D lift orange */
+    --stage-negotiation-bg:    22 100% 62% / 0.16;
+    --stage-won:               146 65% 54%;     /* = metric-positive */
+    --stage-won-bg:            146 65% 54% / 0.16;
+    --stage-lost:              11 75% 59%;      /* = metric-negative */
+    --stage-lost-bg:           11 75% 59% / 0.16;
+
+    /* ─── Action tokens (semânticos — dark optimized) ────────── */
+    --action-primary:          39 99% 46%;      /* = brand-gold */
+    --action-primary-hover:    39 100% 56%;     /* lifted */
+    --action-success:          146 65% 54%;     /* = metric-positive */
+    --action-warning:          39 87% 60%;      /* amber */
+    --action-danger:           11 75% 59%;      /* = metric-negative */
+    --action-info:             166 30% 51%;     /* = chart-primary */
+
+    /* ─── Glows coloridos (rgba — não passa por HSL) ────────── */
+    --glow-ink:        20 20 20;
+    --glow-gold:       231 149 1;
+    --glow-sage:       134 151 145;
+    --glow-terracotta: 204 72 51;
+    --glow-positive:   61 213 140;
+    --glow-negative:   229 97 74;
+    --glow-chart:      91 168 154;
+
+    /* ─── Overlay de modal (sólido, sem blur) ────────────────── */
+    --neutral-overlay: rgba(0, 0, 0, 0.72);
+
+    /* ─── Durations (mantidos v4) ────────────────────────────── */
+    --duration-instant: 100ms;
+    --duration-fast:    150ms;
+    --duration-base:    200ms;
+    --duration-slow:    250ms;
+
+    --easing-standard:   cubic-bezier(0.4, 0, 0.2, 1);
+    --easing-decelerate: cubic-bezier(0,   0, 0.2, 1);
+    --easing-accelerate: cubic-bezier(0.4, 0, 1,   1);
+    --easing-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ─── LIGHT mode (opt-in via class="light") ────────────────── */
+  .light {
+    --bg-canvas:           0 0% 100%;          /* #FFFFFF */
+    --bg-card:             0 0% 100%;
+    --bg-elevated:         0 0% 98%;           /* #FAFAFA */
+    --bg-sunken:           240 5% 96%;         /* #F5F5F7 */
+    --bg-overlay:          20 20 20 / 0.55;
+
+    --text-primary:        0 0% 8%;            /* #141414 ink */
+    --text-secondary:      0 0% 25%;
+    --text-muted:          0 0% 40%;
+    --text-disabled:       0 0% 68%;
+
+    --background:           0 0% 100%;
+    --foreground:           0 0% 8%;
+    --card:                 0 0% 100%;
+    --card-foreground:      0 0% 8%;
+    --popover:              0 0% 100%;
+    --popover-foreground:   0 0% 8%;
+
+    --primary:              0 0% 8%;           /* ink no light */
+    --primary-foreground:   0 0% 100%;
+
+    --secondary:            150 13% 95%;       /* sage-light */
+    --secondary-foreground: 0 0% 8%;
+
+    --muted:                0 0% 97%;
+    --muted-foreground:     0 0% 40%;
+
+    --accent:               39 99% 46%;
+    --accent-foreground:    0 0% 8%;
+
+    --destructive:          8 60% 50%;         /* terracota original */
+    --destructive-foreground: 0 0% 100%;
+
+    --border:               0 0% 0% / 0.08;
+    --input:                0 0% 84%;
+    --ring:                 39 99% 46%;
+
+    /* Métricas light (versão original v4) */
+    --metric-positive:        142 71% 29%;     /* #15803D */
+    --metric-positive-soft:   142 71% 29% / 0.10;
+    --metric-negative:        8 60% 50%;        /* #CC4833 */
+    --metric-negative-soft:   8 60% 50% / 0.10;
+
+    /* Chart light */
+    --chart-primary:          159 8% 56%;       /* sage puro fica melhor em light */
+    --chart-primary-glow:     159 8% 56% / 0.20;
+    --chart-secondary:        39 99% 46%;
+    --chart-tertiary:         257 30% 50%;
+    --chart-grid:             0 0% 0% / 0.06;
+    --chart-axis-text:        0 0% 40%;
+
+    /* Borders light */
+    --border-sutil:           hsla(0, 0%, 0%, 0.08);
+    --border-strong:          hsla(0, 0%, 0%, 0.16);
+    --border-gold-soft:       hsla(39, 99%, 46%, 0.30);
+
+    --inner-highlight:        inset 0 1px 0 hsla(0, 0%, 100%, 0.65);
+
+    /* Channels light */
+    --channel-whatsapp:        142 71% 35%;
+    --channel-instagram:       272 75% 50%;
+    --channel-webchat:         217 91% 50%;
+
+    /* Stage colors light */
+    --stage-new:               0 0% 40%;
+    --stage-new-bg:            0 0% 40% / 0.10;
+    --stage-contact:           217 91% 50%;
+    --stage-contact-bg:        217 91% 50% / 0.10;
+    --stage-proposal:          39 87% 50%;
+    --stage-proposal-bg:       39 87% 50% / 0.10;
+    --stage-negotiation:       24 95% 50%;
+    --stage-negotiation-bg:    24 95% 50% / 0.10;
+    --stage-won:               142 71% 29%;
+    --stage-won-bg:            142 71% 29% / 0.10;
+    --stage-lost:              8 60% 50%;
+    --stage-lost-bg:           8 60% 50% / 0.10;
+
+    --action-primary:          0 0% 8%;         /* ink */
+    --action-success:          142 71% 29%;
+    --action-warning:          26 90% 37%;
+    --action-danger:           8 60% 50%;
+    --action-info:             200 95% 32%;
+
+    --neutral-overlay: rgba(20, 20, 20, 0.55);
+  }
+
+  /* ─── Compatibilidade: .dark continua sendo dark (alias) ──── */
+  .dark {
+    /* dark = root = default, então .dark é no-op aqui;
+       mantido para next-themes setar a classe sem quebrar nada */
+  }
+}
+
+/* =================================================================
+   BASE STYLES
+   ================================================================= */
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    @apply scroll-smooth;
+    color-scheme: dark;       /* scrollbar nativa dark por padrão */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  html.light { color-scheme: light; }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family:
+      var(--font-hind), var(--font-inter),
+      -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus ring global — animado com pulse único (1×, 600ms) */
+  :focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px hsl(var(--ring));
+    animation: ring-pulse 600ms var(--easing-decelerate) 1;
+    border-radius: inherit;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-foreground;
+  }
+
+  /* Scrollbar customizada (dark by default) */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--bg-elevated));
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-gold);
+  }
+
+  .kanban-scroll::-webkit-scrollbar { height: 6px; }
+  .kanban-scroll::-webkit-scrollbar-track { background: transparent; }
+  .kanban-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--bg-elevated));
+    border-radius: 9999px;
+  }
+}
+
+/* =================================================================
+   UTILITIES v5 (novas)
+   ================================================================= */
+@layer utilities {
+
+  /* ─── 1. Surfaces layered (substitui sombras pesadas) ──────── */
+  .bg-canvas    { background: hsl(var(--bg-canvas)); }
+  .bg-card      { background: hsl(var(--bg-card)); }
+  .bg-elevated  { background: hsl(var(--bg-elevated)); }
+  .bg-sunken    { background: hsl(var(--bg-sunken)); }
+
+  /* ─── 2. Card variants ──────────────────────────────────────── */
+  .card-default {
+    background: hsl(var(--bg-card));
+    border: 1px solid var(--border-sutil);
+    border-radius: var(--radius);
+    box-shadow: var(--inner-highlight);
+  }
+  .card-interactive {
+    background: hsl(var(--bg-card));
+    border: 1px solid var(--border-sutil);
+    border-radius: var(--radius);
+    box-shadow: var(--inner-highlight);
+    transition: border-color 150ms ease, transform 180ms ease,
+                box-shadow 180ms ease;
+  }
+  .card-interactive:hover {
+    border-color: var(--border-gold-soft);
+    transform: translateY(-2px);
+    box-shadow:
+      var(--inner-highlight),
+      0 8px 24px -8px rgb(var(--glow-gold) / 0.20);
+  }
+  .card-feature {
+    background: hsl(var(--bg-elevated));
+    border: 1px solid var(--border-gold-soft);
+    border-radius: var(--radius);
+    box-shadow:
+      var(--inner-highlight),
+      0 6px 20px -6px rgb(var(--glow-gold) / 0.18);
+  }
+
+  /* ─── 3. Filter bar sticky (sem blur — bg sólido 96%) ──────── */
+  .filter-bar-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: hsl(var(--bg-card) / 0.96);
+    border-bottom: 1px solid var(--border-sutil);
+  }
+
+  /* ─── 4. Tag pills ──────────────────────────────────────────── */
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: hsl(var(--bg-elevated));
+    color: hsl(var(--text-secondary));
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 150ms ease;
+  }
+  .tag-pill:hover {
+    border-color: var(--brand-gold);
+    box-shadow: 0 0 0 3px rgb(var(--glow-gold) / 0.15);
+    color: var(--brand-gold);
+  }
+  .tag-pill-warm {
+    background: rgb(var(--glow-gold) / 0.14);
+    color: var(--brand-gold);
+  }
+  .tag-pill-positive {
+    background: hsl(var(--metric-positive-soft));
+    color: hsl(var(--metric-positive));
+  }
+  .tag-pill-negative {
+    background: hsl(var(--metric-negative-soft));
+    color: hsl(var(--metric-negative));
+  }
+
+  /* ─── 5. FAB gold (canto inferior direito) ──────────────────── */
+  .fab-gold {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    background: var(--brand-gold);
+    color: var(--brand-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 8px 24px -8px rgb(var(--glow-gold) / 0.50),
+      0 4px 8px -2px rgb(0 0 0 / 0.40);
+    transition: transform 200ms var(--easing-decelerate),
+                box-shadow 200ms var(--easing-decelerate);
+    z-index: 40;
+  }
+  .fab-gold:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 14px 36px -10px rgb(var(--glow-gold) / 0.70),
+      0 6px 12px -4px rgb(0 0 0 / 0.45);
+  }
+  .fab-gold:active { transform: translateY(0) scale(0.98); }
+  @media (max-width: 640px) {
+    .fab-gold { bottom: 80px; right: 16px; }   /* acima da bottom-nav 56px */
+  }
+
+  /* ─── 6. Pulse live indicator (presence, "ao vivo") ────────── */
+  .pulse-live {
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: hsl(var(--metric-positive));
+    animation: pulse-live 1.6s ease-in-out infinite;
+  }
+
+  /* ─── 7. Skeleton shimmer (dark + light) ──────────────────── */
+  .skeleton-shimmer-dark {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--bg-sunken)) 0%,
+      color-mix(in srgb, hsl(var(--bg-elevated)) 82%, var(--brand-gold)) 50%,
+      hsl(var(--bg-sunken)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 6px;
+  }
+  .skeleton-shimmer {  /* light version (v4 mantida) */
+    background: linear-gradient(
+      90deg,
+      hsl(0 0% 94%) 0%,
+      color-mix(in srgb, hsl(0 0% 97%) 88%, var(--brand-gold)) 50%,
+      hsl(0 0% 94%) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 6px;
+  }
+  /* No dark, override .skeleton-shimmer para versão dark */
+  :root .skeleton-shimmer,
+  .dark .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--bg-sunken)) 0%,
+      color-mix(in srgb, hsl(var(--bg-elevated)) 82%, var(--brand-gold)) 50%,
+      hsl(var(--bg-sunken)) 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  /* ─── 8. Sparkline animated draw (SVG path) ──────────────── */
+  .sparkline-path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-sparkline 800ms var(--easing-decelerate) 200ms forwards;
+  }
+
+  /* ─── 9. Font helpers (mantidos v4) ──────────────────────── */
+  .font-kpi {
+    font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    transition: text-shadow 220ms var(--easing-decelerate);
+  }
+  .group:hover .font-kpi-glow,
+  .font-kpi-glow:hover {
+    text-shadow:
+      0 0 18px rgb(var(--glow-gold) / 0.40),
+      0 0 2px  rgb(var(--glow-gold) / 0.22);
+  }
+
+  /* ─── 10. Inputs (focus glow gold mantido v4) ────────────── */
+  .input-focus-glow:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px rgb(var(--glow-gold) / 0.65),
+      0 4px 16px -4px rgb(var(--glow-gold) / 0.30);
+    animation: ring-pulse 600ms var(--easing-decelerate) 1;
+  }
+
+  /* ─── 11. Modal overlay sólido (sem blur) ────────────────── */
+  .modal-overlay {
+    background-color: var(--neutral-overlay);
+  }
+
+  /* ─── 12. Hero mesh (mantido v4 — só inverte luminâncias) ── */
+  .bg-hero-mesh {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 20%, rgb(var(--glow-gold) / 0.08), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 70%, rgb(var(--glow-chart) / 0.10), transparent 65%),
+      radial-gradient(ellipse 70% 60% at 50% 110%, rgb(var(--glow-terracotta) / 0.06), transparent 60%),
+      hsl(var(--bg-canvas));
+  }
+  .light .bg-hero-mesh {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 20%, rgb(var(--glow-gold) / 0.12), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 70%, rgb(var(--glow-sage) / 0.16), transparent 65%),
+      radial-gradient(ellipse 70% 60% at 50% 110%, rgb(var(--glow-terracotta) / 0.10), transparent 60%),
+      hsl(var(--background));
+  }
+
+  /* ─── 13. Stage chips (preservados v3/v4 + dark optimized) ── */
+  .stage-chip-new        { background: hsl(var(--stage-new-bg));        color: hsl(var(--stage-new));        }
+  .stage-chip-contact    { background: hsl(var(--stage-contact-bg));    color: hsl(var(--stage-contact));    }
+  .stage-chip-proposal   { background: hsl(var(--stage-proposal-bg));   color: hsl(var(--stage-proposal));   }
+  .stage-chip-negotiation{ background: hsl(var(--stage-negotiation-bg));color: hsl(var(--stage-negotiation));}
+  .stage-chip-won        { background: hsl(var(--stage-won-bg));        color: hsl(var(--stage-won));        }
+  .stage-chip-lost       { background: hsl(var(--stage-lost-bg));       color: hsl(var(--stage-lost));       }
+
+  /* ─── 14. Channel dots ──────────────────────────────────────── */
+  .channel-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+  }
+  .channel-dot-whatsapp  { background: hsl(var(--channel-whatsapp));  }
+  .channel-dot-instagram { background: hsl(var(--channel-instagram)); }
+  .channel-dot-webchat   { background: hsl(var(--channel-webchat));   }
+
+  /* ─── 15. v4 compatibility (mantido para não quebrar nada) ── */
+  .surface-premium {
+    background: hsl(var(--bg-card));
+    border: 1px solid var(--border-sutil);
+    border-radius: var(--radius);
+    box-shadow: var(--inner-highlight);
+    transition: border-color 150ms ease;
+  }
+  .surface-premium-gold {
+    background: hsl(var(--bg-elevated));
+    border: 1px solid var(--border-gold-soft);
+    border-radius: var(--radius);
+    box-shadow:
+      var(--inner-highlight),
+      0 6px 20px -6px rgb(var(--glow-gold) / 0.18);
+  }
+  .border-gradient-brand {
+    background:
+      linear-gradient(hsl(var(--bg-card)), hsl(var(--bg-card))) padding-box,
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--brand-gold) 65%, transparent) 0%,
+        color-mix(in srgb, var(--brand-sage) 50%, transparent) 100%
+      ) border-box;
+    border: 1px solid transparent;
+  }
+  .border-gradient-feature {
+    background:
+      linear-gradient(hsl(var(--bg-elevated)), hsl(var(--bg-elevated))) padding-box,
+      linear-gradient(135deg, var(--brand-gold), var(--brand-sage)) border-box;
+    border: 1.5px solid transparent;
+  }
+
+  /* Sombras v4 (mantidas — usadas em botões e drag de card) */
+  .shadow-gold {
+    box-shadow:
+      0 4px 16px -4px rgb(var(--glow-gold) / 0.22),
+      0 2px 6px  -2px rgb(var(--glow-ink)  / 0.10);
+  }
+  .shadow-gold-lift {
+    transform: translateY(-3px);
+    box-shadow:
+      0 14px 32px -8px rgb(var(--glow-gold) / 0.28),
+      0 6px  14px -6px rgb(var(--glow-ink)  / 0.18);
+  }
+  .shadow-ink-glow {
+    box-shadow:
+      0 10px 24px -8px rgb(var(--glow-ink) / 0.32),
+      0 4px  10px -4px rgb(var(--glow-ink) / 0.18);
+  }
+
+  /* Botão primary premium (atualizado v5: bg gold no dark) */
+  .btn-primary-premium {
+    background: hsl(var(--action-primary));
+    color: hsl(var(--primary-foreground));
+    box-shadow:
+      0 4px 12px -4px rgb(var(--glow-gold) / 0.30),
+      0 2px 6px  -2px rgb(var(--glow-ink)  / 0.30);
+    transition: transform 150ms var(--easing-decelerate),
+                box-shadow 150ms var(--easing-decelerate);
+  }
+  .btn-primary-premium:hover {
+    background: hsl(var(--action-primary-hover));
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 24px -8px rgb(var(--glow-gold) / 0.50),
+      0 4px  10px -4px rgb(var(--glow-ink)  / 0.40);
+  }
+  .btn-primary-premium:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+/* =================================================================
+   KEYFRAMES
+   ================================================================= */
+@keyframes shimmer {
+  0%   { background-position: 200% 0;  }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-live {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgb(var(--glow-positive) / 0.6);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgb(var(--glow-positive) / 0);
+    transform: scale(1.15);
+  }
+}
+
+@keyframes draw-sparkline {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0)      scale(1);    }
+  50%      { transform: translate(20px,-16px) scale(1.06); }
+}
+
+@keyframes pulse-sage {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(1.15); opacity: 0.7; }
+}
+
+@keyframes ring-pulse {
+  0% {
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px rgb(var(--glow-gold) / 0.90),
+      0 0 18px 2px rgb(var(--glow-gold) / 0.45);
+  }
+  60% {
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 7px rgb(var(--glow-gold) / 0.30),
+      0 0 12px 0  rgb(var(--glow-gold) / 0.20);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px rgb(var(--glow-gold) / 0.65);
+  }
+}
+
+/* =================================================================
+   ACESSIBILIDADE — prefers-reduced-motion
+   ================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pulse-live,
+  .skeleton-shimmer,
+  .skeleton-shimmer-dark,
+  .sparkline-path {
+    animation: none !important;
+  }
+  :focus-visible,
+  .input-focus-glow:focus-visible {
+    animation: none !important;
+  }
+  .fab-gold:hover,
+  .card-interactive:hover {
+    transform: none !important;
+  }
+}
+
+/* =================================================================
+   PRINT — força light (papel)
+   ================================================================= */
+@media print {
+  :root {
+    --bg-canvas:  0 0% 100%;
+    --bg-card:    0 0% 100%;
+    --bg-elevated:0 0% 100%;
+    --bg-sunken:  0 0% 97%;
+    --text-primary:   0 0% 8%;
+    --text-secondary: 0 0% 25%;
+    --text-muted:     0 0% 40%;
+    --background:     0 0% 100%;
+    --foreground:     0 0% 8%;
+    --card:           0 0% 100%;
+    --primary:        0 0% 8%;
+    --primary-foreground: 0 0% 100%;
+    --border:         0 0% 0% / 0.20;
+    --border-sutil:   hsla(0, 0%, 0%, 0.20);
+    --inner-highlight:inset 0 0 0 transparent;
+  }
+  body { background: #FFFFFF; color: #000000; }
+  .no-print { display: none !important; }
+  .card-default,
+  .card-interactive,
+  .card-feature,
+  .surface-premium,
+  .surface-premium-gold {
+    background: #FFFFFF !important;
+    box-shadow: none !important;
+    border: 1px solid #CCCCCC !important;
+  }
+  .fab-gold { display: none !important; }
+}
+```
+
+---
+
+## tailwind.config.ts — deltas obrigatórios v5
+
+```typescript
+// Merge nas chaves existentes. v4 deltas continuam válidos.
+
+theme: {
+  extend: {
+    colors: {
+      // ─── Surfaces (novidade v5) ───
+      bg: {
+        canvas:   'hsl(var(--bg-canvas))',
+        card:     'hsl(var(--bg-card))',
+        elevated: 'hsl(var(--bg-elevated))',
+        sunken:   'hsl(var(--bg-sunken))',
+      },
+      // ─── Texto ───
+      fg: {
+        primary:   'hsl(var(--text-primary))',
+        secondary: 'hsl(var(--text-secondary))',
+        muted:     'hsl(var(--text-muted))',
+        disabled:  'hsl(var(--text-disabled))',
+      },
+      // ─── Métricas ───
+      metric: {
+        positive:        'hsl(var(--metric-positive))',
+        'positive-soft': 'hsl(var(--metric-positive-soft))',
+        negative:        'hsl(var(--metric-negative))',
+        'negative-soft': 'hsl(var(--metric-negative-soft))',
+        neutral:         'hsl(var(--metric-neutral))',
+      },
+      // ─── Chart palette ───
+      chart: {
+        primary:     'hsl(var(--chart-primary))',
+        secondary:   'hsl(var(--chart-secondary))',
+        tertiary:    'hsl(var(--chart-tertiary))',
+        grid:        'hsl(var(--chart-grid))',
+        'axis-text': 'hsl(var(--chart-axis-text))',
+      },
+      // ─── Brand (v4 mantido + alias) ───
+      brand: {
+        DEFAULT:           '#E79501',     // gold como brand default (era ink no v4)
+        ink:               '#141414',
+        'ink-hover':       '#000000',
+        paper:             '#FFFFFF',
+        gold:              '#E79501',
+        'gold-hover':      '#FFA61F',
+        'gold-light':      '#FFF5E1',
+        sage:              '#869791',
+        'sage-hover':      '#6F7F7B',
+        'sage-light':      '#EEF2F0',
+        terracotta:        '#CC4833',
+        'terracotta-hover':'#A83A28',
+        'terracotta-light':'#FBE5E0',
+        // Aliases v3/v4 de compatibilidade (deprecated, remover em v5.1)
+        forest:            '#E79501',     // mapeia para gold (era ink no v4)
+        500:               '#E79501',     // bg-brand-500 → gold no v5
+      },
+      // ─── Channels ───
+      channel: {
+        whatsapp:  'hsl(var(--channel-whatsapp))',
+        instagram: 'hsl(var(--channel-instagram))',
+        webchat:   'hsl(var(--channel-webchat))',
+      },
+      // ─── Stage ───
+      stage: {
+        new:          'hsl(var(--stage-new))',
+        'new-bg':     'hsl(var(--stage-new-bg))',
+        contact:      'hsl(var(--stage-contact))',
+        'contact-bg': 'hsl(var(--stage-contact-bg))',
+        proposal:     'hsl(var(--stage-proposal))',
+        'proposal-bg':'hsl(var(--stage-proposal-bg))',
+        negotiation:  'hsl(var(--stage-negotiation))',
+        'negotiation-bg':'hsl(var(--stage-negotiation-bg))',
+        won:          'hsl(var(--stage-won))',
+        'won-bg':     'hsl(var(--stage-won-bg))',
+        lost:         'hsl(var(--stage-lost))',
+        'lost-bg':    'hsl(var(--stage-lost-bg))',
+      },
+      // ─── Action (já existia v4, atualizar) ───
+      action: {
+        primary:       'hsl(var(--action-primary))',
+        'primary-hover':'hsl(var(--action-primary-hover))',
+        success:       'hsl(var(--action-success))',
+        warning:       'hsl(var(--action-warning))',
+        danger:        'hsl(var(--action-danger))',
+        info:          'hsl(var(--action-info))',
+      },
+    },
+    borderColor: {
+      sutil:      'var(--border-sutil)',
+      strong:     'var(--border-strong)',
+      'gold-soft':'var(--border-gold-soft)',
+    },
+    borderRadius: {
+      DEFAULT: 'var(--radius)',          // 0.75rem v5 (era 0.5rem v4)
+      lg:      'var(--radius)',
+      md:      'calc(var(--radius) - 4px)',
+      sm:      'calc(var(--radius) - 6px)',
+    },
+    fontFamily: {
+      sans: ['var(--font-hind)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
+      mono: ['var(--font-mono)', 'JetBrains Mono', 'IBM Plex Mono', 'monospace'],
+    },
+    boxShadow: {
+      // v4 mantidos
+      'gold':       '0 4px 16px -4px rgb(231 149 1 / 0.22), 0 2px 6px -2px rgb(20 20 20 / 0.10)',
+      'sage':       '0 4px 14px -4px rgb(134 151 145 / 0.24), 0 1px 3px -1px rgb(20 20 20 / 0.08)',
+      'ink-glow':   '0 10px 24px -8px rgb(20 20 20 / 0.32), 0 4px 10px -4px rgb(20 20 20 / 0.18)',
+      'terracotta': '0 4px 14px -4px rgb(204 72 51 / 0.24)',
+      'gold-lift':  '0 14px 32px -8px rgb(231 149 1 / 0.28), 0 6px 14px -6px rgb(20 20 20 / 0.18)',
+      // v5 novas
+      'card-hover': '0 8px 24px -8px rgb(231 149 1 / 0.20)',
+      'fab':        '0 0 0 1px rgb(255 255 255 / 0.08), 0 8px 24px -8px rgb(231 149 1 / 0.50), 0 4px 8px -2px rgb(0 0 0 / 0.40)',
+      'fab-hover':  '0 0 0 1px rgb(255 255 255 / 0.12), 0 14px 36px -10px rgb(231 149 1 / 0.70), 0 6px 12px -4px rgb(0 0 0 / 0.45)',
+      'inner-light':'inset 0 1px 0 hsla(0,0%,100%,0.04)',
+      'inner-paper':'inset 0 1px 0 hsla(0,0%,100%,0.65)',
+    },
+    keyframes: {
+      // v4 mantidos
+      'orb-drift':  { '0%, 100%': { transform: 'translate(0,0) scale(1)' }, '50%': { transform: 'translate(20px,-16px) scale(1.06)' } },
+      shimmer:      { '0%': { backgroundPosition: '200% 0' }, '100%': { backgroundPosition: '-200% 0' } },
+      'pulse-sage': { '0%, 100%': { transform: 'scale(1)', opacity: '1' }, '50%': { transform: 'scale(1.15)', opacity: '0.7' } },
+      'ring-pulse': {
+        '0%':   { boxShadow: '0 0 0 2px hsl(var(--background)), 0 0 0 4px rgb(231 149 1 / 0.90), 0 0 18px 2px rgb(231 149 1 / 0.45)' },
+        '60%':  { boxShadow: '0 0 0 2px hsl(var(--background)), 0 0 0 7px rgb(231 149 1 / 0.30), 0 0 12px 0 rgb(231 149 1 / 0.20)' },
+        '100%': { boxShadow: '0 0 0 2px hsl(var(--background)), 0 0 0 4px rgb(231 149 1 / 0.65)' },
+      },
+      // v5 novas
+      'pulse-live': {
+        '0%, 100%': { boxShadow: '0 0 0 0 rgba(61,213,140,0.6)', transform: 'scale(1)' },
+        '50%':      { boxShadow: '0 0 0 6px rgba(61,213,140,0)',   transform: 'scale(1.15)' },
+      },
+      'draw-sparkline': { to: { strokeDashoffset: '0' } },
+    },
+    animation: {
+      'orb-drift':       'orb-drift 14s ease-in-out infinite',
+      shimmer:           'shimmer 1.6s ease-in-out infinite',
+      'pulse-sage':      'pulse-sage 1.6s ease-in-out infinite',
+      'pulse-live':      'pulse-live 1.6s ease-in-out infinite',
+      'ring-pulse':      'ring-pulse 600ms cubic-bezier(0,0,0.2,1) 1',
+      'draw-sparkline':  'draw-sparkline 800ms ease-out 200ms forwards',
+    },
+    transitionDuration: {
+      instant: '100ms',
+      fast:    '150ms',
+      base:    '200ms',
+      slow:    '250ms',
+    },
+  },
+},
+```
+
+---
+
+## Compatibilidade com código existente
+
+| Selector usado hoje | Antes (v4) | Depois (v5) | Quebra? |
+|---|---|---|---|
+| `bg-background` | branco (light) | dark canvas | ⚠ **Mudança visual esperada** (era o objetivo) |
+| `text-foreground` | ink | off-white dark | ⚠ **Mudança visual esperada** |
+| `bg-card` | branco | `#141414` (= brand-ink) | ⚠ Mudança visual esperada |
+| `border-border` | cinza claro | hsla white 6% | ⚠ Mais sutil — pode precisar ajuste de divider críticos para `border-strong` |
+| `bg-primary` | ink (light) | gold (dark default) | ⚠ CTAs ficam gold |
+| `text-primary-foreground` | branco (light) | ink (dark) | ⚠ Texto sobre CTA agora é preto |
+| `bg-brand-500` | ink | **gold** | ⚠ Mudança grande — qualquer chip/badge que usava `bg-brand-500` vira gold |
+| `text-brand-500` | ink | gold | ⚠ Idem |
+| `.surface-premium` (v4) | bg branco + sombra | bg-card + inner-highlight | ✅ funciona (definição atualizada) |
+| `.surface-premium-gold` | bg branco + sombra gold | bg-elevated + border-gold-soft | ✅ funciona |
+| `.glass`, `.glass-strong` | (não existiam v4) | (continuam não existir) | ✅ |
+| `.skeleton-shimmer` | light shimmer | **auto-detecta tema** (dark default agora) | ✅ |
+| `.bg-hero-mesh` | luminâncias 12% | luminâncias 8% (dark) + 12% (light) | ✅ funciona em ambos |
+| `.input-focus-glow` | gold ring + pulse | mantido | ✅ |
+| `.font-kpi` + `.font-kpi-glow` | mantido | mantido | ✅ |
+| `.btn-primary-premium` | bg ink | **bg gold no dark** (auto via token) | ⚠ Visual diferente; comportamento idêntico |
+
+**Resultado:** Fábio aplica o patch + tailwind.config sem tocar em componentes; o app inteiro vira dark. Refinos componente-a-componente entram nas tasks T4-T16 (ver `migration-plan-v5.md`).
+
+---
+
+*Patch CSS v5 (dark-first) — Davi Designer | CRM Techmalhas | 2026-05-25*
