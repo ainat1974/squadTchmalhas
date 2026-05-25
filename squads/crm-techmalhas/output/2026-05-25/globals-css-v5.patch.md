@@ -566,6 +566,65 @@
   .channel-dot-instagram { background: hsl(var(--channel-instagram)); }
   .channel-dot-webchat   { background: hsl(var(--channel-webchat));   }
 
+  /* ─── 14b. BrandMark — monograma TM tipográfico ──────────────
+     Decisão Tania 2026-05-25 (pós-mockups v5):
+     - "TM" em Hind 700 destacado (fonte real do site, 2125× uso dominante)
+     - Cor gold #E79501 — acento real da marca, AAA no dark, amarra sistema visual
+     - Glow text-shadow só no dark; sem glow em light/print/avatar/favicon
+     - Spec completa em design-system-v5.md §5.9
+  */
+  .brand-tm {
+    font-family: var(--font-hind), 'Hind', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--brand-gold);
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    text-rendering: geometricPrecision;
+    /* default: sem glow (avatar/favicon usam .brand-tm puro) */
+    text-shadow: none;
+    transition: text-shadow 150ms var(--easing-decelerate);
+  }
+  .brand-tm-glow {
+    text-shadow:
+      0 0 24px rgb(var(--glow-gold) / 0.35),
+      0 0  4px rgb(var(--glow-gold) / 0.18);
+  }
+  .brand-tm-glow:hover,
+  a:hover > .brand-tm-glow,
+  button:hover > .brand-tm-glow {
+    text-shadow:
+      0 0 28px rgb(var(--glow-gold) / 0.50),
+      0 0  6px rgb(var(--glow-gold) / 0.24);
+  }
+  /* Light mode: gold em fundo branco já tem contraste — glow vira sujeira */
+  .light .brand-tm-glow {
+    text-shadow: none;
+  }
+  .brand-wordmark-rest {
+    font-family: var(--font-hind), 'Hind', system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    color: hsl(var(--text-muted));
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  /* Avatar fallback: TM em off-white, sem glow, círculo bg-elevated */
+  .brand-tm-avatar {
+    font-family: var(--font-hind), 'Hind', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: hsl(var(--text-primary));
+    background: hsl(var(--bg-elevated));
+    border-radius: 9999px;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
   /* ─── 15. v4 compatibility (mantido para não quebrar nada) ── */
   .surface-premium {
     background: hsl(var(--bg-card));

@@ -351,18 +351,30 @@ const recommendations = [
 
 ---
 
-### T14 — Refactor Login (dark hero)
+### T14 — Refactor Login (dark hero) + criar `BrandMark` (decisão Tania 2026-05-25)
 
-**O que:** trocar `bg-hero-mesh` para versão dark (já no `globals.css` v5 — opacidades menores); card vira `bg-elevated` com inner-highlight gold 4%; CTA "Entrar" agora é gold.
+**O que:**
+1. Trocar `bg-hero-mesh` para versão dark (já no `globals.css` v5 — opacidades menores); card vira `bg-elevated` com inner-highlight gold 4%; CTA "Entrar" agora é gold.
+2. **Criar componente `BrandMark`** (decisão Tania pós-mockups: monograma "TM" em Hind 700 gold destacado, NÃO "T" genérico em quadrado). Spec completa em `design-system-v5.md` §5.9.
+3. **Criar `app/icon.svg`** (Next 16 file convention) com TM em Hind 700 gold sobre fundo dark — gera favicon automático.
+4. Substituir o atual "T" em quadrado por `<BrandMark variant="hero" />` no Login, e por `<BrandMark variant="sidebar" />` na Sidebar (afeta também T15/T16/T17 onde a sidebar aparece — mas o componente é o mesmo, sem refactor extra).
 
 **Arquivos:**
 - `crm-app/app/(auth)/login/page.tsx`
+- Criar `crm-app/components/brand/BrandMark.tsx` (snippet pronto em `design-system-v5.md` §5.9.5)
+- Criar `crm-app/app/icon.svg` (snippet pronto em `design-system-v5.md` §5.9.7)
+- `crm-app/components/layout/Sidebar.tsx` (substituir logo placeholder por `<BrandMark variant="sidebar" />` ou `"sidebar-collapsed"`)
 
-**Mudança principal:** o card era branco; agora é `bg-elevated`. Inputs eram bg branco; agora `bg-sunken`. CTA era ink; agora gold.
+**Mudança principal:** o card era branco; agora é `bg-elevated`. Inputs eram bg branco; agora `bg-sunken`. CTA era ink; agora gold. **Monograma deixa de ser "T" em quadrado e vira "TM" tipográfico Hind 700 gold com glow sutil.**
 
-**Critério de feito:** login carrega em dark; mesh sutil visível; card destacado por elevação + border-gold-soft; orbs ainda funcionam mas com luminância menor.
+**Critério de feito:**
+- Login carrega em dark; mesh sutil visível; card destacado por elevação + border-gold-soft.
+- `<BrandMark variant="hero" />` renderiza no centro do card: "TM" 40px gold com glow + "CRM" 12px muted abaixo.
+- Sidebar (todas as rotas internas) mostra `<BrandMark variant="sidebar" />` no topo: "TMechmalhas" inline com TM 28px gold+glow e "echmalhas" 14px muted.
+- Favicon do browser tab mostra TM gold sobre quadrado dark rounded.
+- Glow respeita `prefers-reduced-motion` (estático, sem transição de hover).
 
-**Horas:** **1h**
+**Horas:** **2h** (era 1h sem BrandMark; +1h para componente + favicon SVG + integrar em login/sidebar/avatar fallback)
 
 ---
 
@@ -587,13 +599,13 @@ Cada commit deve passar `pnpm typecheck && pnpm build` antes de ser empurrado.
 | T11 | DataTableDark | 1.5 |
 | T12 | FABGold | 1.0 |
 | T13 | Dashboard page restructure (compose v5) | 3.0 |
-| T14 | Login dark | 1.0 |
+| T14 | Login dark + `BrandMark` (TM Hind) + favicon SVG | 2.0 |
 | T15 | Pipeline Kanban dark | 1.5 |
 | T16 | Leads list dark | 1.0 |
 | T17 | Chat dark + QA WCAG + print validation | 1.5 |
-| **Soma bruta** | | **25.0h** |
+| **Soma bruta** | | **26.0h** |
 | **Concorrência/reuso** | (~20% das tarefas se sobrepõem em componentes shadcn já refatorados) | **−5.0h** |
-| **Estimativa target** | | **~20h** |
+| **Estimativa target** | | **~21h** (era 20h antes da inclusão do `BrandMark`; +1h cabe na faixa 18-24h) |
 
 > O cálculo `25h − 20%` é conservador. Se Tania aceitar o pivot rapidamente e Fábio puder dedicar 2 dias inteiros (sem interrupções), 18h é alcançável.
 

@@ -49,9 +49,9 @@ O login do v5 mantém o tom premium do v4 mas em dark mode. Em vez de bg branco 
 ▒                                                                            ▒
 ▒              ═══════════════════════════════════════════                   ▒
 ▒              ███ bg-elevated #1C1D21 + inner-light    ███                  ▒
-▒              ███  ┌─────┐                              ███                 ▒
-▒              ███  │  T  │  ← logo Techmalhas (white)   ███                 ▒
-▒              ███  └─────┘                              ███                 ▒
+▒              ███                                       ███                 ▒
+▒              ███   ✦ TM ✦ CRM  ← BrandMark hero (40px gold+glow)███         ▒
+▒              ███      Hind 700 letter-spacing -0.04em  ███                  ▒
 ▒              ███                                       ███                 ▒
 ▒              ███  CRM Techmalhas              (h1)     ███                 ▒
 ▒              ███  Entre para continuar       (muted)   ███                 ▒
@@ -93,9 +93,9 @@ O login do v5 mantém o tom premium do v4 mas em dark mode. Em vez de bg branco 
 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
 ▒  ⊙ mesh-gold top                ▒
 ▒                                 ▒
-▒        ┌─────┐                  ▒
-▒        │  T  │ ← logo white     ▒
-▒        └─────┘                  ▒
+▒                                 ▒
+▒        ✦ TM ✦ CRM ← BrandMark   ▒
+▒        hero gold+glow Hind 700  ▒
 ▒                                 ▒
 ▒        CRM Techmalhas           ▒
 ▒        Entre para continuar     ▒
@@ -172,9 +172,9 @@ O login do v5 mantém o tom premium do v4 mas em dark mode. Em vez de bg branco 
 ▒│▓ bg-  ▓│ ▓ Dashboard                              [Hist. conversas]   ▓ │▒
 ▒│▓ card ▓│ ▓ ··· filter-bar-sticky #16181C/96 ··············••••••••••• ▓ │▒
 ▒│▓      ▓│ ▓ [📅 25/04 – 25/05][Pipeline: Atacado ▾][Vend: Todos ▾][Canal▾]▓│▒
-▒│▓ ┌──┐ ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
-▒│▓ │T │ ▓│                                                                 │▒
-▒│▓ └──┘ ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
+▒│▓✦TM ✦▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
+▒│▓echma- ▓│   ← BrandMark sidebar (TM 28px gold+glow Hind 700, "echmalhas" 14px muted) │▒
+▒│▓lhas   ▓│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │▒
 ▒│▓      ▓│ ▓ Resultados de vendas                                       ▓ │▒
 ▒│▓ ●Dash▓│ ▓┌──────────┐┌──────────┐┌──────────┐╔══════════╗            ▓│▒
 ▒│▓  Pipe▓│ ▓│RECEITA   ││TICKET MD ││CONV. RATE││PIPELINE  ║ ← elevated ▓│▒
@@ -803,13 +803,51 @@ Comunicação ao vivo. **3-panel layout** (sidebar nav esquerda + lista conversa
 - Mobile: `top-center` (não colide com bottom nav).
 - Variants dark: success (left border `--metric-positive`), warning (`--action-warning`), error (`--metric-negative`), info (`--chart-primary`).
 
-## E. Logo Techmalhas — variantes
+## E. BrandMark — monograma TM tipográfico (decisão Tania 2026-05-25)
 
-| Variante | Onde | SVG |
-|---|---|---|
-| White | Sidebar dark (default), header dark, login dark | Recriar como SVG inline com `fill: currentColor` |
-| Black | Light mode opt-in | Mesmo SVG com cor herdada |
-| Mark only | Avatar fallback | Letra "T" Hind 700 |
+> **Especificação completa:** ver `design-system-v5.md` §5.9 `BrandMark` / `TechmalhasLogo`.
+> **Decisão:** monograma deixa de ser "T" em quadrado e passa a ser **"TM" em Hind 700** (fonte real do site, 2125× uso dominante). Cor: **gold `#E79501`** (acento real da marca, AAA contraste no dark, amarra TM com FAB + primary CTA + ring focus). Glow `text-shadow` 24px gold 35% no dark; sem glow no light/print/avatar.
+
+| Variante | Onde aparece | Tipografia | Cor | Glow | Sufixo |
+|---|---|---|---|---|---|
+| **`hero`** | Login centro do card (40px) | Hind 700 letter-spacing -0.04em | gold `#E79501` | ✅ sim | "CRM" 12px uppercase tracking-wide |
+| **`sidebar`** | Sidebar expanded 240px (28px) | Hind 700 letter-spacing -0.04em | gold `#E79501` | ✅ sim | "echmalhas" 14px `--text-muted` |
+| **`sidebar-collapsed`** | Sidebar collapsed 64px (32px) | Hind 700 letter-spacing -0.04em | gold `#E79501` | ✅ sim | — |
+| **`mark`** | Favicon, ícone PWA (32px SVG) | Hind 700 (SVG `<text>` ou path) | gold `#E79501` sobre canvas `#0A0B0D` rounded 6px | ❌ não (raster pequeno) | — |
+| **`avatar`** | Avatar fallback (LeadCard sem foto, 20px em círculo `bg-elevated`) | Hind 700 letter-spacing -0.04em | `--text-primary` off-white | ❌ não (não competir com avatares reais de clientes) | — |
+| **`print`** | Relatórios impressos do dashboard | Hind 700 | ink `#141414` | ❌ não | "echmalhas" `#666666` |
+
+### Anatomia visual do BrandMark
+
+```
+hero (login):                sidebar expanded:           sidebar collapsed:
+┌─────────────────┐         ┌──────────────────┐        ┌──────┐
+│                 │         │                  │        │      │
+│  ✦ TM ✦         │         │ ✦TM ✦echmalhas   │        │ ✦TM✦ │
+│       CRM       │         │ 28px gold  14px  │        │ 32px │
+│   12px muted    │         │ +glow     muted  │        │ +glow│
+│                 │         └──────────────────┘        └──────┘
+└─────────────────┘
+40px gold +glow
+
+avatar fallback (LeadCard sem foto):     favicon (32×32 SVG):
+┌────────┐                              ┌────┐
+│ ╭────╮ │                              │TM  │  ← gold sobre rounded-square dark
+│ │ TM │ │  ← 20px off-white,            │ TM │     16px, sem glow (raster)
+│ ╰────╯ │     SEM glow                   │    │
+│ círculo │     (não rouba foco           └────┘
+│ bg-elev │      em listas)
+└────────┘
+```
+
+### Por quê gold (e não teal-sage ou gradiente)
+
+Davi avaliou 3 opções com WCAG e contexto de marca:
+- **Gold `#E79501` ✅ escolhida** — 8.0:1 AAA, **é** o acento real do site (estrelas, "mais vendidos"), amarra TM ao sistema visual (FAB, primary, ring).
+- Teal-sage `#5BA89A` — 5.2:1 AA, mas é **derivado** para charts; sage no site é **muted** por intenção, contradiz semântica.
+- Gradiente gold→teal-sage — viraria visual "tech startup AI"; Techmalhas é editorial/atemporal.
+
+Decisão registrada em `design-system-v5.md` §5.9.1 e `adr-010-design-system-v5-dark.md` D8.
 
 ## F. ThemeToggle (UserMenu)
 

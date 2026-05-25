@@ -578,6 +578,202 @@ Atalho de teclado **N** (não conflita com nada existente).
 
 ---
 
+### 5.9 `BrandMark` / `TechmalhasLogo` (monograma TM tipográfico)
+
+> **Decisão Tania 2026-05-25 (pós-mockups v5):** o monograma do CRM deixa de ser um "T" genérico em quadrado e passa a ser **"TM" em Hind 700 destacado** — coerência absoluta com a marca real (Hind é a fonte do site, 2125× uso dominante na auditoria). Davi decidiu, com liberdade consciente, usar **gold `#E79501`** como cor de destaque das letras (justificativa abaixo).
+
+#### 5.9.1 Justificativa da cor (gold venceu vs teal-sage e gradiente)
+
+| Opção | Hex | Contraste vs canvas `#0A0B0D` | Pró | Contra |
+|---|---|---|---|---|
+| **A) Gold** ✅ vencedora | `#E79501` | **8.0:1 ✅ AAA** | É **o** acento real da marca (13× no site — estrelas, "mais vendidos", destaques); amarra TM com FAB + primary CTA + ring focus (sistema visual coerente); máximo destaque no dark | Já é muito usado em outros pontos — risco mínimo de "saturação dourada" mitigado por aplicar TM em apenas 4 lugares (sidebar, login, favicon, avatar fallback) |
+| B) Teal-sage | `#5BA89A` | 5.2:1 ✅ AA | Mais "tech"; coerente com `--chart-primary` | Teal-sage é **derivado** (sage + sutileza teal), não cor literal da marca; sage no site é **muted** por intenção (fundos suaves) — usar como TM contradiz a semântica do token |
+| C) Gradient gold → teal-sage | — | ~5.2:1 (ponta sage) | Visual "premium" | Quebra a sensação editorial/atemporal do site (techmalhas.com.br é minimalista monocromático com 1 acento); gradiente em monograma vira "tech startup AI" — não é Techmalhas |
+
+**Conclusão Davi:** **gold é a única escolha que respeita a marca literal + entrega contraste AAA + amarra o sistema visual.** Sage e gradiente são tecnicamente válidos mas semanticamente incoerentes com a identidade Techmalhas. Decisão consciente, registrada.
+
+#### 5.9.2 Tipografia exata
+
+| Propriedade | Valor | Razão |
+|---|---|---|
+| `font-family` | `var(--font-hind)` | Mesma fonte do site (Hind dominante 2125× na auditoria) |
+| `font-weight` | `700` (bold) | Hind 700 tem bone geométrico firme — ideal para monograma |
+| `letter-spacing` | `-0.04em` | Kerning apertado: TM lê como **um mark único**, não duas letras |
+| `font-feature-settings` | `'kern' 1, 'liga' 1` | Liga `T`+`M` se a fonte tiver ligature (Hind não tem nativa, mas habilita defensivamente) |
+| `line-height` | `1` | Monograma centra verticalmente sem "respirar" |
+| `text-rendering` | `geometricPrecision` | Bordas mais limpas em tamanhos grandes |
+
+#### 5.9.3 Escala de tamanhos (5 contextos)
+
+| Contexto | Tamanho TM | Tamanho wordmark | Layout |
+|---|---|---|---|
+| **Favicon** (browser tab, ícone PWA) | 16px (compõe SVG 32×32) | — | Só TM, centralizado em quadrado com canto arredondado 4px |
+| **Sidebar collapsed** (largura 64px) | 32px | — | Só TM, centralizado |
+| **Sidebar expanded** (largura 240px) | 28px | "echmalhas" 14px muted | TM + "echmalhas" inline (não "Techmalhas" inteiro — TM já é o "T") |
+| **Login hero** (centro do card) | 40px | "CRM" 12px muted uppercase tracking-wide | TM em destaque + "CRM" como product badge abaixo |
+| **Avatar fallback** (LeadCard sem foto) | 20px | — | TM em círculo `bg-elevated` 40px (sem glow nesta variante — não competir com avatar de cliente) |
+
+#### 5.9.4 Tratamento visual (glow gold sutil)
+
+Em **fundos dark** (canvas/card/elevated), TM recebe **text-shadow glow** muito sutil para "respirar" da superfície:
+
+```css
+.brand-tm-glow {
+  text-shadow:
+    0 0 24px rgba(231, 149, 1, 0.35),
+    0 0  4px rgba(231, 149, 1, 0.18);
+}
+```
+
+**Não usar glow:**
+- Avatar fallback (escala 20px — glow vira blur ilegível)
+- Print stylesheet (papel monocromático)
+- Favicon (raster pequeno — glow some na compressão)
+- Light mode (gold em fundo branco já tem contraste suficiente; glow vira "halo amarelado" sujo)
+
+#### 5.9.5 Componente React/TSX (pronto para Fábio)
+
+```tsx
+// crm-app/components/brand/BrandMark.tsx
+import { cn } from '@/lib/utils'
+
+type BrandMarkProps = {
+  /** Variante de layout */
+  variant?: 'mark' | 'sidebar' | 'sidebar-collapsed' | 'hero' | 'avatar'
+  /** Sufixo opcional ("echmalhas" para wordmark completo, "CRM" para badge de produto) */
+  suffix?: 'echmalhas' | 'CRM' | null
+  /** Aplica glow gold (default: true exceto em avatar/favicon) */
+  glow?: boolean
+  className?: string
+}
+
+const sizeMap = {
+  'mark':              { tm: 32, suffix: 0,  gap: 0 },
+  'sidebar':           { tm: 28, suffix: 14, gap: 2 },
+  'sidebar-collapsed': { tm: 32, suffix: 0,  gap: 0 },
+  'hero':              { tm: 40, suffix: 12, gap: 6 },
+  'avatar':            { tm: 20, suffix: 0,  gap: 0 },
+}
+
+export function BrandMark({
+  variant = 'sidebar',
+  suffix = variant === 'sidebar' ? 'echmalhas' : variant === 'hero' ? 'CRM' : null,
+  glow,
+  className,
+}: BrandMarkProps) {
+  const sizes = sizeMap[variant]
+  const showGlow = glow ?? (variant !== 'avatar')
+
+  return (
+    <span
+      className={cn('inline-flex items-baseline', className)}
+      style={{ gap: sizes.gap }}
+      aria-label="Techmalhas"
+    >
+      <span
+        className={cn('brand-tm', showGlow && 'brand-tm-glow')}
+        style={{ fontSize: sizes.tm, lineHeight: 1 }}
+        aria-hidden="true"
+      >
+        TM
+      </span>
+      {suffix === 'echmalhas' && (
+        <span
+          className="brand-wordmark-rest"
+          style={{ fontSize: sizes.suffix, lineHeight: 1 }}
+          aria-hidden="true"
+        >
+          echmalhas
+        </span>
+      )}
+      {suffix === 'CRM' && (
+        <span
+          className="brand-wordmark-rest uppercase tracking-[0.18em]"
+          style={{ fontSize: sizes.suffix, lineHeight: 1 }}
+          aria-hidden="true"
+        >
+          CRM
+        </span>
+      )}
+    </span>
+  )
+}
+```
+
+**Uso:**
+
+```tsx
+// Sidebar expanded
+<BrandMark variant="sidebar" />               // → "TMechmalhas" inline
+
+// Sidebar collapsed
+<BrandMark variant="sidebar-collapsed" />     // → "TM" 32px
+
+// Login hero
+<BrandMark variant="hero" />                  // → "TM" 40px + "CRM" abaixo
+
+// Avatar fallback (sem cliente foto)
+<BrandMark variant="avatar" glow={false} />   // → "TM" 20px em círculo
+```
+
+#### 5.9.6 Regras de wordmark (quando "echmalhas" vs "CRM" vs nada)
+
+| Contexto | Sufixo | Razão |
+|---|---|---|
+| Sidebar expanded em qualquer rota | `"echmalhas"` | Reforça marca; usuário lê uma vez por sessão |
+| Sidebar collapsed | nenhum | Falta espaço |
+| Login hero | `"CRM"` | Diferencia "este é o CRM da Techmalhas" do site público |
+| Header sticky de página interna | nenhum | Sidebar já mostra a marca; header foca no contexto da página |
+| Avatar fallback | nenhum | É um placeholder, não branding |
+| Favicon | nenhum | 16px não comporta sufixo |
+| Email transactional (futuro) | `"echmalhas"` | Reforço de marca fora do app |
+
+#### 5.9.7 SVG favicon (32×32 com TM Hind)
+
+Como Hind não está disponível em fontes de sistema do browser para favicon raster, o favicon embute o texto **diretamente como SVG path** (converter "TM" em Hind 700 para path no Figma/Illustrator e exportar). Enquanto o asset definitivo não fica pronto, usar SVG com `<text>` (Hind via Google Fonts não funciona em favicon — fallback para `system-ui` é aceitável apenas em transição):
+
+```svg
+<!-- crm-app/app/icon.svg (Next 16 file convention — gera favicon automático) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#0A0B0D"/>
+  <text
+    x="50%" y="58%"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="Hind, system-ui, -apple-system, sans-serif"
+    font-weight="700"
+    font-size="16"
+    letter-spacing="-0.04em"
+    fill="#E79501"
+  >TM</text>
+</svg>
+```
+
+**Etapa polish (pós-launch, opcional):** converter "TM" em `<path d="...">` via Figma (mais robusto em browsers sem Hind disponível como fallback).
+
+#### 5.9.8 Variantes light/dark/print
+
+| Tema | TM color | Glow | Wordmark color |
+|---|---|---|---|
+| **Dark** (default) | `#E79501` gold | `text-shadow` 24px gold 35% | `--text-muted` `#A8AFB8` |
+| **Light** (opt-in) | `#E79501` gold | ❌ sem glow (halo amarelado em fundo branco vira sujeira) | `--text-muted` light `#666666` |
+| **Print** (papel) | `#141414` ink | ❌ | `#666666` cinza |
+| **Avatar fallback** (ambos) | `--text-primary` (off-white dark / ink light) | ❌ | — |
+
+**Por que avatar fallback não é gold?** Avatar fallback aparece **lado a lado com avatares reais de clientes** em listas/Kanban — se cada "TM" virasse uma estrela dourada, viraria o foco visual da lista. Em avatar fallback, TM é **placeholder neutro**.
+
+#### 5.9.9 Estados
+
+| Estado | Visual |
+|---|---|
+| Default | TM gold + glow (dark) |
+| Hover (quando link, ex: sidebar logo clicável para `/dashboard`) | Glow intensifica de 35% → 50% em 150ms |
+| Focus visible | Ring gold 2px ao redor do componente (acessibilidade ao Tab) |
+| Loading inicial (FOUC) | Renderiza com `font-family: system-ui` provisoriamente; ao Hind carregar, swap (display: swap já no `next/font`) |
+| Reduced motion | Glow estático, sem transição |
+
+---
+
 ## 6. Estados completos (preservados do v4 + ajustes dark)
 
 | Estado | Visual v5 | Tokens-chave |

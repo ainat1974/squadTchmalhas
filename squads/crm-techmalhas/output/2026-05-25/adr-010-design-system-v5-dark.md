@@ -187,6 +187,7 @@ A Tania pediu para que o CRM **seja inspirado nessa referência** — preservand
 | D5 | Light invertido fiel ao v4 vs light "simplificado" | ✅ Light = v4 invertido (preserva trabalho dos mockups) |
 | D6 | Print = sempre light vs print = current theme | ✅ Print sempre light (papel não é dark) |
 | D7 | FAB atalho de teclado | ✅ **N** para "Novo" (não conflita com nada existente) |
+| D8 | Monograma TM (Tania 2026-05-25 pós-mockups v5) | ✅ **"TM" em Hind 700 destacado** (não "T" em quadrado genérico). **Cor gold `#E79501`** — Davi avaliou gold vs teal-sage vs gradiente; gold venceu por (1) ser o acento real da marca no site, (2) WCAG AAA 8.0:1 no dark, (3) amarrar TM com FAB+primary+ring (sistema visual coerente). Glow text-shadow 24px gold 35% no dark; sem glow no light/print/avatar/favicon. **Spec completa:** `design-system-v5.md` §5.9; **CSS:** `globals-css-v5.patch.md` utilities §14b (`.brand-tm`, `.brand-tm-glow`, `.brand-wordmark-rest`, `.brand-tm-avatar`); **wireframes:** todas as 5 telas atualizadas em `wireframes-v5.md` Anexo E. **Impacto no plano:** +1h em T14 (Fábio cria componente `BrandMark.tsx` + favicon SVG durante refactor do Login). |
 
 ---
 
