@@ -1,10 +1,9 @@
-import { Badge } from '@/components/ui/badge'
-import { cn }    from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 const CONFIG = {
-  whatsapp:  { label: 'WhatsApp', bg: 'bg-[#25D366]', text: 'text-white' },
-  instagram: { label: 'Instagram', bg: 'bg-[#E1306C]', text: 'text-white' },
-  webchat:   { label: 'Chat Site', bg: 'bg-blue-500',  text: 'text-white' },
+  whatsapp:  { label: 'WhatsApp', dot: 'channel-dot-whatsapp',  text: 'text-channel-whatsapp' },
+  instagram: { label: 'Instagram', dot: 'channel-dot-instagram', text: 'text-channel-instagram' },
+  webchat:   { label: 'Webchat',   dot: 'channel-dot-webchat',   text: 'text-channel-webchat' },
 } as const
 
 type Channel = keyof typeof CONFIG
@@ -12,8 +11,14 @@ type Channel = keyof typeof CONFIG
 export function ChannelBadge({ channel }: { channel: Channel }) {
   const c = CONFIG[channel]
   return (
-    <Badge className={cn('text-[10px] font-semibold uppercase tracking-wide', c.bg, c.text, 'hover:opacity-90')}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full bg-elevated px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+        c.text,
+      )}
+    >
+      <span className={['channel-dot', c.dot].join(' ')} />
       {c.label}
-    </Badge>
+    </span>
   )
 }

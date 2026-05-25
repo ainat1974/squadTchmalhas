@@ -27,7 +27,6 @@ export default async function DashboardPage() {
     prisma.activity.count({
       where: { assignedTo: user.id, isDone: false, dueDate: { lt: now }, deletedAt: null },
     }),
-    // Funil: contagem por stage no pipeline do usuário
     prisma.stage.findMany({
       where:   {
         pipeline: {
@@ -54,45 +53,44 @@ export default async function DashboardPage() {
   })
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-
-      {/* KPIs */}
+    <div className="overflow-y-auto p-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KPICard
           title="Receita (30d)"
           value={formatCurrency(totalRevenue)}
           icon="💰"
           trend={wonDeals.length > 0 ? 'up' : 'neutral'}
+          accent="gold"
         />
         <KPICard
           title="Deals Abertos"
           value={totalDeals.toString()}
           icon="📋"
+          accent="sage"
         />
         <KPICard
           title="Novos Leads (30d)"
           value={newLeads.toString()}
           icon="👤"
           trend="up"
+          accent="sage"
         />
         <KPICard
           title="Taxa de Conversão"
           value={`${conversionRate.toFixed(1)}%`}
           icon="🎯"
           trend={conversionRate >= 30 ? 'up' : 'down'}
+          accent={conversionRate >= 30 ? 'positive' : 'negative'}
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Funil */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <FunnelChart stages={pipelineStages.map(s => ({
           name:  s.name,
           color: s.color,
           count: s._count.deals,
         }))} />
 
-        {/* Atividades atrasadas */}
         <OverduePanel
           activities={overdueActivities.map(a => ({
             id:          a.id,
