@@ -12,10 +12,5 @@
       "path":     "/api/cron/webchat-expire",
       "schedule": "0 4 * * *"
     }
-  ],
-  "functions": {
-    "app/api/cron/lgpd-purge/route.ts":    { "maxDuration": 300 },
-    "app/api/cron/whatsapp-retry/route.ts": { "maxDuration": 60  },
-    "app/api/cron/webchat-expire/route.ts": { "maxDuration": 60  }
-  }
+  ]
 }
