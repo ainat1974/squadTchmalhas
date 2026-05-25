@@ -3,6 +3,7 @@ import Link       from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn }     from '@/lib/utils'
 import { UserMenu } from './UserMenu'
+import { BrandMark } from '@/components/brand/BrandMark'
 import type { User } from '@prisma/client'
 import {
   LayoutDashboard, KanbanSquare, Users, MessageSquare,
@@ -35,13 +36,12 @@ export function Sidebar({ user }: Props) {
   )
 
   return (
-    <aside className="flex h-full w-60 flex-col border-r bg-card">
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500">
-          <span className="text-sm font-bold text-white">T</span>
-        </div>
-        <span className="font-semibold text-brand-500">Techmalhas CRM</span>
+    <aside className="bg-card flex h-full w-60 flex-col border-r border-sutil">
+      {/* BrandMark — TM gold + CRM Techmalhas stacked (decisão Tania 2026-05-25) */}
+      <div className="flex h-20 items-center justify-center border-b border-sutil px-6">
+        <Link href="/dashboard" aria-label="Ir para Dashboard">
+          <BrandMark variant="sidebar" />
+        </Link>
       </div>
 
       {/* Navegação */}
@@ -53,22 +53,30 @@ export function Sidebar({ user }: Props) {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-base',
                 isActive
-                  ? 'bg-brand-500 text-white'
-                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+                  ? 'border border-gold-soft bg-brand-gold/10 text-brand-gold shadow-[inset_0_1px_0_hsla(0,0%,100%,0.04)]'
+                  : 'border border-transparent text-fg-muted hover:border-sutil hover:bg-elevated hover:text-fg-primary',
               )}
             >
-              {item.icon}
+              <span className={cn(
+                'transition-transform duration-base',
+                'group-hover:scale-[1.05]',
+                isActive && 'text-brand-gold',
+              )}>
+                {item.icon}
+              </span>
               {item.label}
-              {isActive && <ChevronRight className="ml-auto h-4 w-4 opacity-60" />}
+              {isActive && (
+                <ChevronRight className="ml-auto h-4 w-4 text-brand-gold opacity-80" />
+              )}
             </Link>
           )
         })}
       </nav>
 
       {/* User Menu */}
-      <div className="border-t p-3">
+      <div className="border-t border-sutil p-3">
         <UserMenu user={user} />
       </div>
     </aside>
