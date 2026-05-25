@@ -1,8 +1,8 @@
 /**
- * middleware.ts — Proteção de rotas (Edge Runtime)
- * Código autocontido: imports de @/lib/* quebram o bundle Edge na Vercel.
+ * middleware.ts — Proteção leve de rotas (Edge Runtime)
+ * Sem @supabase/ssr aqui: createServerClient quebra no Edge da Vercel em produção.
+ * Sessão real é validada em Server Components via lib/auth.ts.
  */
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PREVIEW_MODE =
@@ -22,60 +22,32 @@ function isPublicPath(pathname: string): boolean {
   )
 }
 
-async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request })
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key || url.includes('placeholder')) {
-    return { response, user: null }
-  }
-
-  const supabase = createServerClient(url, key, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        response = NextResponse.next({ request })
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
-        )
-      },
-    },
-  })
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  return { response, user }
+/** Cookie de sessão Supabase (sb-<ref>-auth-token) */
+function hasAuthCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some(
+    (c) => c.name.includes('-auth-token') && Boolean(c.value),
+  )
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  if (isPublicPath(pathname) || PREVIEW_MODE) {
-    return NextResponse.next({ request })
-  }
-
   try {
-    const { response, user } = await updateSession(request)
+    const { pathname } = request.nextUrl
 
-    if (!user) {
+    if (isPublicPath(pathname) || PREVIEW_MODE) {
+      return NextResponse.next({ request })
+    }
+
+    if (!hasAuthCookie(request)) {
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/login'
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
 
-    return response
+    return NextResponse.next({ request })
   } catch (err) {
-    console.error('[middleware] auth check failed:', err)
-    const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/login'
-    return NextResponse.redirect(loginUrl)
+    console.error('[middleware] unexpected error:', err)
+    return NextResponse.next({ request })
   }
 }
 
