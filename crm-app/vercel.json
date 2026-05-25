@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "_comment": "Cron schedules ajustados para Vercel Hobby (1x/dia). Para Pro, restaurar: whatsapp-retry='*/5 * * * *' e webchat-expire='*/15 * * * *'.",
   "crons": [
     {
       "path":     "/api/cron/lgpd-purge",
@@ -6,16 +8,16 @@
     },
     {
       "path":     "/api/cron/whatsapp-retry",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path":     "/api/cron/webchat-expire",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 4 * * *"
     }
   ],
   "functions": {
     "app/api/cron/lgpd-purge/route.ts":    { "maxDuration": 300 },
-    "app/api/cron/whatsapp-retry/route.ts": { "maxDuration": 30  },
-    "app/api/cron/webchat-expire/route.ts": { "maxDuration": 30  }
+    "app/api/cron/whatsapp-retry/route.ts": { "maxDuration": 60  },
+    "app/api/cron/webchat-expire/route.ts": { "maxDuration": 60  }
   }
 }
