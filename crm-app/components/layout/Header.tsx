@@ -13,6 +13,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/tasks': 'Tarefas',
   '/settings': 'Configurações',
   '/settings/pipelines': 'Configurações',
+  '/settings/users': 'Configurações',
 }
 
 function getPageTitle(pathname: string): string {
