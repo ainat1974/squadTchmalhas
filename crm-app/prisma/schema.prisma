@@ -1,0 +1,632 @@
+// =============================================================
+// CRM Techmalhas — Prisma Schema
+// Stack: Prisma 6.x + Supabase (PostgreSQL 15) + Vercel
+// IMPORTANTE: 
+//   - DATABASE_URL  → Supabase Transaction Pooler (porta 6543) — para queries
+//   - DIRECT_URL    → Supabase Direct Connection (porta 5432)  — para migrations
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  admin
+  gestor
+  vendedor_atacado
+  atendente_varejo
+
+  @@map("user_role")
+}
+
+enum PipelineType {
+  atacado
+  varejo
+
+  @@map("pipeline_type")
+}
+
+enum DealStatus {
+  open
+  won
+  lost
+  archived
+
+  @@map("deal_status")
+}
+
+enum ActivityType {
+  task
+  call
+  meeting
+  email
+  note
+  whatsapp
+  instagram
+
+  @@map("activity_type")
+}
+
+enum InteractionChannel {
+  whatsapp
+  instagram
+  webchat
+  email
+  note
+  call
+  manual
+
+  @@map("interaction_channel")
+}
+
+enum InteractionDirection {
+  inbound
+  outbound
+  internal
+
+  @@map("interaction_direction")
+}
+
+enum MessageStatus {
+  pending
+  sent
+  delivered
+  read
+  failed
+
+  @@map("message_status")
+}
+
+enum LeadSourceType {
+  whatsapp
+  instagram
+  site_form
+  site_chat
+  manual
+  referral
+
+  @@map("lead_source_type")
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  EXPORT
+  LOGIN
+  CONSENT
+
+  @@map("audit_action")
+}
+
+enum NotificationType {
+  new_lead
+  new_message
+  task_due
+  deal_updated
+  mention
+  system
+
+  @@map("notification_type")
+}
+
+enum WebchatSessionStatus {
+  waiting
+  active
+  closed
+  abandoned
+
+  @@map("webchat_session_status")
+}
+
+// ============================================================
+// MODEL: User
+// Sincronizado com auth.users do Supabase via trigger SQL
+// ============================================================
+model User {
+  id          String    @id @db.Uuid
+  email       String    @unique @db.Text
+  fullName    String    @map("full_name") @db.Text
+  avatarUrl   String?   @map("avatar_url") @db.Text
+  role        UserRole  @default(atendente_varejo)
+  isActive    Boolean   @default(true) @map("is_active")
+  phone       String?   @db.Text
+  lastLoginAt DateTime? @map("last_login_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  contacts              Contact[]      @relation("ContactOwner")
+  dealsOwned            Deal[]         @relation("DealOwner")
+  dealsCreated          Deal[]         @relation("DealCreatedBy")
+  activitiesAssigned    Activity[]     @relation("ActivityAssignee")
+  activitiesCreated     Activity[]     @relation("ActivityCreatedBy")
+  interactions          Interaction[]
+  pipelinesCreated      Pipeline[]
+  notifications         Notification[]
+  webchatSessions       WebchatSession[]
+  auditLogs             AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@map("users")
+}
+
+// ============================================================
+// MODEL: LeadSource
+// Tabela lookup — origens de leads
+// ============================================================
+model LeadSource {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String         @db.Text
+  type        LeadSourceType
+  description String?        @db.Text
+  isActive    Boolean        @default(true) @map("is_active")
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  contacts Contact[]
+
+  @@map("lead_sources")
+}
+
+// ============================================================
+// MODEL: Contact
+// Unifica lead + cliente. dapic_id reservado para integração futura.
+// ============================================================
+model Contact {
+  id              String        @id @default(uuid()) @db.Uuid
+  fullName        String        @map("full_name") @db.Text
+  email           String?       @db.Text
+  phone           String?       @db.Text
+  documentCpf     String?       @map("document_cpf") @db.Text
+  documentCnpj    String?       @map("document_cnpj") @db.Text
+  companyName     String?       @map("company_name") @db.Text
+  isB2b           Boolean       @default(false) @map("is_b2b")
+  leadSourceId    String?       @map("lead_source_id") @db.Uuid
+  pipelineType    PipelineType? @map("pipeline_type")
+  // Dapic — reservado para v2
+  dapicId         String?       @map("dapic_id") @db.Text
+  dapicSyncedAt   DateTime?     @map("dapic_synced_at") @db.Timestamptz
+  // Canais de contato
+  whatsappPhone   String?       @map("whatsapp_phone") @db.Text
+  instagramId     String?       @map("instagram_id") @db.Text
+  instagramUsername String?     @map("instagram_username") @db.Text
+  // LGPD
+  lgpdConsent     Boolean       @default(false) @map("lgpd_consent")
+  lgpdConsentAt   DateTime?     @map("lgpd_consent_at") @db.Timestamptz
+  lgpdConsentIp   String?       @map("lgpd_consent_ip") @db.Inet
+  // Responsável
+  assignedTo      String?       @map("assigned_to") @db.Uuid
+  // Metadados
+  tags            String[]      @default([]) @db.Text
+  notes           String?       @db.Text
+  avatarUrl       String?       @map("avatar_url") @db.Text
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?     @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  owner             User?              @relation("ContactOwner", fields: [assignedTo], references: [id])
+  leadSource        LeadSource?        @relation(fields: [leadSourceId], references: [id])
+  deals             Deal[]
+  activities        Activity[]
+  interactions      Interaction[]
+  whatsappMessages  WhatsappMessage[]
+  instagramMessages InstagramMessage[]
+  notifications     Notification[]
+  webchatSessions   WebchatSession[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([whatsappPhone], map: "idx_contacts_whatsapp")
+  @@index([instagramId], map: "idx_contacts_instagram")
+  @@index([assignedTo], map: "idx_contacts_assigned")
+  @@index([dapicId], map: "idx_contacts_dapic")
+  @@index([createdAt(sort: Desc)], map: "idx_contacts_created")
+  @@map("contacts")
+}
+
+// ============================================================
+// MODEL: Pipeline
+// Pipeline Atacado (B2B) ou Varejo (B2C)
+// ============================================================
+model Pipeline {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @db.Text
+  type        PipelineType @unique
+  description String?      @db.Text
+  isActive    Boolean      @default(true) @map("is_active")
+  createdBy   String?      @map("created_by") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  creator User?    @relation(fields: [createdBy], references: [id])
+  stages  Stage[]
+  deals   Deal[]
+
+  @@map("pipelines")
+}
+
+// ============================================================
+// MODEL: Stage
+// Etapas configuráveis por pipeline
+// ============================================================
+model Stage {
+  id            String   @id @default(uuid()) @db.Uuid
+  pipelineId    String   @map("pipeline_id") @db.Uuid
+  name          String   @db.Text
+  description   String?  @db.Text
+  position      Int      @default(0)
+  color         String   @default("#6366f1") @db.Text
+  isWonStage    Boolean  @default(false) @map("is_won_stage")
+  isLostStage   Boolean  @default(false) @map("is_lost_stage")
+  probability   Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  pipeline       Pipeline            @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  deals          Deal[]
+  requiredTasks  StageRequiredTask[]
+
+  @@unique([pipelineId, position], map: "stages_unique_position_per_pipeline")
+  @@index([pipelineId, position], map: "idx_stages_pipeline")
+  @@map("stages")
+}
+
+// ============================================================
+// MODEL: StageRequiredTask
+// Templates de tarefas obrigatórias geradas ao mover para o stage
+// ============================================================
+model StageRequiredTask {
+  id            String       @id @default(uuid()) @db.Uuid
+  stageId       String       @map("stage_id") @db.Uuid
+  title         String       @db.Text
+  description   String?      @db.Text
+  activityType  ActivityType @default(task) @map("activity_type")
+  dueDaysOffset Int          @default(1) @map("due_days_offset")
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  stage      Stage      @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@index([stageId], map: "idx_stage_required_tasks_stage")
+  @@map("stage_required_tasks")
+}
+
+// ============================================================
+// MODEL: Deal
+// Oportunidades. dapic_pedido_id reservado para v2.
+// ============================================================
+model Deal {
+  id                String     @id @default(uuid()) @db.Uuid
+  title             String     @db.Text
+  contactId         String     @map("contact_id") @db.Uuid
+  pipelineId        String     @map("pipeline_id") @db.Uuid
+  stageId           String     @map("stage_id") @db.Uuid
+  assignedTo        String?    @map("assigned_to") @db.Uuid
+  // Financeiro
+  value             Decimal?   @db.Decimal(12, 2)
+  currency          String     @default("BRL") @db.Char(3)
+  // Status
+  status            DealStatus @default(open)
+  closedAt          DateTime?  @map("closed_at") @db.Timestamptz
+  lostReason        String?    @map("lost_reason") @db.Text
+  // Dapic — reservado para v2
+  dapicPedidoId     String?    @map("dapic_pedido_id") @db.Text
+  // Metadados
+  expectedCloseDate DateTime?  @map("expected_close_date") @db.Date
+  notes             String?    @db.Text
+  tags              String[]   @default([]) @db.Text
+  createdBy         String?    @map("created_by") @db.Uuid
+  createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt         DateTime?  @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  contact       Contact       @relation(fields: [contactId], references: [id])
+  pipeline      Pipeline      @relation(fields: [pipelineId], references: [id])
+  stage         Stage         @relation(fields: [stageId], references: [id])
+  owner         User?         @relation("DealOwner", fields: [assignedTo], references: [id])
+  creator       User?         @relation("DealCreatedBy", fields: [createdBy], references: [id])
+  activities    Activity[]
+  interactions  Interaction[]
+  notifications Notification[]
+
+  @@index([contactId], map: "idx_deals_contact")
+  @@index([pipelineId, stageId], map: "idx_deals_pipeline_stage")
+  @@index([assignedTo], map: "idx_deals_assigned")
+  @@index([status], map: "idx_deals_status")
+  @@index([createdAt(sort: Desc)], map: "idx_deals_created")
+  @@index([dapicPedidoId], map: "idx_deals_dapic")
+  @@map("deals")
+}
+
+// ============================================================
+// MODEL: Activity
+// Tarefas, ligações, reuniões, notas por deal ou contact
+// ============================================================
+model Activity {
+  id              String       @id @default(uuid()) @db.Uuid
+  dealId          String?      @map("deal_id") @db.Uuid
+  contactId       String?      @map("contact_id") @db.Uuid
+  assignedTo      String?      @map("assigned_to") @db.Uuid
+  createdBy       String?      @map("created_by") @db.Uuid
+  type            ActivityType @default(task)
+  title           String       @db.Text
+  description     String?      @db.Text
+  isMandatory     Boolean      @default(false) @map("is_mandatory")
+  isDone          Boolean      @default(false) @map("is_done")
+  doneAt          DateTime?    @map("done_at") @db.Timestamptz
+  dueDate         DateTime?    @map("due_date") @db.Timestamptz
+  fromTemplateId  String?      @map("from_template_id") @db.Uuid
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime?    @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  deal         Deal?              @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  contact      Contact?           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  assignee     User?              @relation("ActivityAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  creator      User?              @relation("ActivityCreatedBy", fields: [createdBy], references: [id])
+  fromTemplate StageRequiredTask? @relation(fields: [fromTemplateId], references: [id])
+  notifications Notification[]
+
+  @@index([dealId], map: "idx_activities_deal")
+  @@index([contactId], map: "idx_activities_contact")
+  @@index([assignedTo, isDone], map: "idx_activities_assigned")
+  @@index([dueDate], map: "idx_activities_due")
+  @@map("activities")
+}
+
+// ============================================================
+// MODEL: Interaction
+// Histórico unificado de todas as comunicações
+// ============================================================
+model Interaction {
+  id                    String               @id @default(uuid()) @db.Uuid
+  contactId             String               @map("contact_id") @db.Uuid
+  dealId                String?              @map("deal_id") @db.Uuid
+  userId                String?              @map("user_id") @db.Uuid
+  channel               InteractionChannel
+  direction             InteractionDirection @default(inbound)
+  content               String?              @db.Text
+  contentType           String               @default("text") @map("content_type") @db.Text
+  mediaUrl              String?              @map("media_url") @db.Text
+  mediaMime             String?              @map("media_mime") @db.Text
+  whatsappMessageId     String?              @map("whatsapp_message_id") @db.Uuid
+  instagramMessageId    String?              @map("instagram_message_id") @db.Uuid
+  webchatMessageId      String?              @map("webchat_message_id") @db.Uuid
+  metadata              Json                 @default("{}") @db.JsonB
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  contact           Contact           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  deal              Deal?             @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  user              User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  whatsappMessage   WhatsappMessage?  @relation(fields: [whatsappMessageId], references: [id])
+  instagramMessage  InstagramMessage? @relation(fields: [instagramMessageId], references: [id])
+  webchatMessage    WebchatMessage?   @relation(fields: [webchatMessageId], references: [id])
+
+  @@index([contactId, createdAt(sort: Desc)], map: "idx_interactions_contact")
+  @@index([dealId, createdAt(sort: Desc)], map: "idx_interactions_deal")
+  @@index([channel, createdAt(sort: Desc)], map: "idx_interactions_channel")
+  @@index([createdAt(sort: Desc)], map: "idx_interactions_created")
+  @@map("interactions")
+}
+
+// ============================================================
+// MODEL: WhatsappMessage
+// Rastreia mensagens Meta WhatsApp. meta_message_id = idempotência.
+// ============================================================
+model WhatsappMessage {
+  id                  String               @id @default(uuid()) @db.Uuid
+  contactId           String?              @map("contact_id") @db.Uuid
+  metaMessageId       String               @unique @map("meta_message_id") @db.Text
+  metaPhoneNumberId   String               @map("meta_phone_number_id") @db.Text
+  direction           InteractionDirection
+  status              MessageStatus        @default(pending)
+  contentType         String               @default("text") @map("content_type") @db.Text
+  contentText         String?              @map("content_text") @db.Text
+  contentCaption      String?              @map("content_caption") @db.Text
+  mediaUrl            String?              @map("media_url") @db.Text
+  mediaMime           String?              @map("media_mime") @db.Text
+  mediaSha256         String?              @map("media_sha256") @db.Text
+  templateName        String?              @map("template_name") @db.Text
+  templateVars        Json?                @map("template_vars") @db.JsonB
+  metaTimestamp       DateTime?            @map("meta_timestamp") @db.Timestamptz
+  metaRawPayload      Json                 @map("meta_raw_payload") @db.JsonB
+  retryCount          Int                  @default(0) @map("retry_count") @db.SmallInt
+  retryNextAt         DateTime?            @map("retry_next_at") @db.Timestamptz
+  errorCode           String?              @map("error_code") @db.Text
+  errorMessage        String?              @map("error_message") @db.Text
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  contact      Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  interactions Interaction[]
+
+  @@index([contactId, createdAt(sort: Desc)], map: "idx_wa_messages_contact")
+  @@index([metaMessageId], map: "idx_wa_messages_meta_id")
+  @@index([status], map: "idx_wa_messages_status")
+  @@index([retryNextAt], map: "idx_wa_messages_retry")
+  @@map("whatsapp_messages")
+}
+
+// ============================================================
+// MODEL: InstagramMessage
+// Similar ao WhatsappMessage para Instagram Messaging API
+// ============================================================
+model InstagramMessage {
+  id                    String               @id @default(uuid()) @db.Uuid
+  contactId             String?              @map("contact_id") @db.Uuid
+  metaMessageId         String               @unique @map("meta_message_id") @db.Text
+  metaIgAccountId       String               @map("meta_ig_account_id") @db.Text
+  metaSenderIgId        String?              @map("meta_sender_ig_id") @db.Text
+  isCommentLead         Boolean              @default(false) @map("is_comment_lead")
+  sourcePostId          String?              @map("source_post_id") @db.Text
+  direction             InteractionDirection
+  status                MessageStatus        @default(pending)
+  contentType           String               @default("text") @map("content_type") @db.Text
+  contentText           String?              @map("content_text") @db.Text
+  mediaUrl              String?              @map("media_url") @db.Text
+  mediaMime             String?              @map("media_mime") @db.Text
+  metaTimestamp         DateTime?            @map("meta_timestamp") @db.Timestamptz
+  metaRawPayload        Json                 @map("meta_raw_payload") @db.JsonB
+  retryCount            Int                  @default(0) @map("retry_count") @db.SmallInt
+  retryNextAt           DateTime?            @map("retry_next_at") @db.Timestamptz
+  errorCode             String?              @map("error_code") @db.Text
+  errorMessage          String?              @map("error_message") @db.Text
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime             @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  contact      Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  interactions Interaction[]
+
+  @@index([contactId, createdAt(sort: Desc)], map: "idx_ig_messages_contact")
+  @@index([metaMessageId], map: "idx_ig_messages_meta_id")
+  @@index([status], map: "idx_ig_messages_status")
+  @@index([isCommentLead, sourcePostId], map: "idx_ig_messages_comment")
+  @@map("instagram_messages")
+}
+
+// ============================================================
+// MODEL: WebchatSession
+// Sessões do chat ao vivo do site techmalhas.com.br
+// ============================================================
+model WebchatSession {
+  id                String               @id @default(uuid()) @db.Uuid
+  contactId         String?              @map("contact_id") @db.Uuid
+  assignedTo        String?              @map("assigned_to") @db.Uuid
+  status            WebchatSessionStatus @default(waiting)
+  visitorName       String?              @map("visitor_name") @db.Text
+  visitorEmail      String?              @map("visitor_email") @db.Text
+  visitorPhone      String?              @map("visitor_phone") @db.Text
+  visitorIp         String?              @map("visitor_ip") @db.Inet
+  visitorUserAgent  String?              @map("visitor_user_agent") @db.Text
+  lgpdConsent       Boolean              @default(false) @map("lgpd_consent")
+  lgpdConsentAt     DateTime?            @map("lgpd_consent_at") @db.Timestamptz
+  pageUrl           String?              @map("page_url") @db.Text
+  referrer          String?              @db.Text
+  utmSource         String?              @map("utm_source") @db.Text
+  utmMedium         String?              @map("utm_medium") @db.Text
+  utmCampaign       String?              @map("utm_campaign") @db.Text
+  realtimeChannel   String?              @unique @map("realtime_channel") @db.Text
+  startedAt         DateTime             @default(now()) @map("started_at") @db.Timestamptz
+  endedAt           DateTime?            @map("ended_at") @db.Timestamptz
+  lastActivityAt    DateTime             @default(now()) @map("last_activity_at") @db.Timestamptz
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  contact   Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  operator  User?           @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
+  messages  WebchatMessage[]
+
+  @@index([status, lastActivityAt(sort: Desc)], map: "idx_webchat_sessions_status")
+  @@index([assignedTo], map: "idx_webchat_sessions_assigned")
+  @@index([contactId], map: "idx_webchat_sessions_contact")
+  @@index([lastActivityAt], map: "idx_webchat_sessions_idle")
+  @@map("webchat_sessions")
+}
+
+// ============================================================
+// MODEL: WebchatMessage
+// Mensagens do chat ao vivo
+// ============================================================
+model WebchatMessage {
+  id            String         @id @default(uuid()) @db.Uuid
+  sessionId     String         @map("session_id") @db.Uuid
+  isFromVisitor Boolean        @default(true) @map("is_from_visitor")
+  userId        String?        @map("user_id") @db.Uuid
+  visitorName   String?        @map("visitor_name") @db.Text
+  content       String         @db.Text
+  contentType   String         @default("text") @map("content_type") @db.Text
+  mediaUrl      String?        @map("media_url") @db.Text
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  readAt        DateTime?      @map("read_at") @db.Timestamptz
+
+  // Relations
+  session      WebchatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  interactions Interaction[]
+
+  @@index([sessionId, createdAt(sort: Asc)], map: "idx_webchat_messages_session")
+  @@index([sessionId, readAt], map: "idx_webchat_messages_unread")
+  @@map("webchat_messages")
+}
+
+// ============================================================
+// MODEL: Notification
+// Notificações em tempo real para usuários do CRM
+// ============================================================
+model Notification {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  type       NotificationType
+  title      String           @db.Text
+  body       String?          @db.Text
+  dealId     String?          @map("deal_id") @db.Uuid
+  contactId  String?          @map("contact_id") @db.Uuid
+  activityId String?          @map("activity_id") @db.Uuid
+  isRead     Boolean          @default(false) @map("is_read")
+  readAt     DateTime?        @map("read_at") @db.Timestamptz
+  link       String?          @db.Text
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deal     Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  contact  Contact?  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  activity Activity? @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)], map: "idx_notifications_user_unread")
+  @@index([userId, createdAt(sort: Desc)], map: "idx_notifications_user")
+  @@map("notifications")
+}
+
+// ============================================================
+// MODEL: AuditLog
+// LGPD: registro de todo CRUD em dados de PII
+// ============================================================
+model AuditLog {
+  id            BigInt      @id @default(autoincrement())
+  userId        String?     @map("user_id") @db.Uuid
+  userEmail     String      @map("user_email") @db.Text
+  userRole      UserRole?   @map("user_role")
+  userIp        String?     @map("user_ip") @db.Inet
+  userAgent     String?     @map("user_agent") @db.Text
+  action        AuditAction
+  tableName     String      @map("table_name") @db.Text
+  recordId      String?     @map("record_id") @db.Uuid
+  changedFields String[]    @default([]) @map("changed_fields") @db.Text
+  oldValues     Json?       @map("old_values") @db.JsonB
+  requestId     String?     @map("request_id") @db.Text
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)], map: "idx_audit_logs_user")
+  @@index([tableName, recordId], map: "idx_audit_logs_table_record")
+  @@index([createdAt(sort: Desc)], map: "idx_audit_logs_created")
+  @@index([action, createdAt(sort: Desc)], map: "idx_audit_logs_action")
+  @@map("audit_logs")
+}

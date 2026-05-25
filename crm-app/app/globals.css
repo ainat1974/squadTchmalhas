@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ─── Techmalhas Brand Verde ───────────────── */
+    --background:   0 0% 100%;
+    --foreground:   152 60% 10%;     /* verde muito escuro */
+
+    --card:         0 0% 100%;
+    --card-foreground: 152 60% 10%;
+
+    --popover:      0 0% 100%;
+    --popover-foreground: 152 60% 10%;
+
+    /* Primary = Azul CTA (#1D4ED8) — separado do brand verde */
+    --primary:      221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary = verde claro */
+    --secondary:    152 44% 93%;
+    --secondary-foreground: 152 60% 15%;
+
+    --muted:        152 10% 95%;
+    --muted-foreground: 152 10% 45%;
+
+    --accent:       30 63% 49%;      /* Caramelo #C97A2F */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive:  0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border:       152 15% 88%;
+    --input:        152 15% 88%;
+    --ring:         152 60% 30%;     /* brand verde para focus rings */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background:   152 30% 6%;
+    --foreground:   152 5% 95%;
+    --card:         152 25% 9%;
+    --card-foreground: 152 5% 95%;
+    --popover:      152 25% 9%;
+    --popover-foreground: 152 5% 95%;
+    --primary:      221 83% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary:    152 20% 15%;
+    --secondary-foreground: 152 5% 80%;
+    --muted:        152 15% 15%;
+    --muted-foreground: 152 10% 60%;
+    --accent:       30 55% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive:  0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border:       152 15% 20%;
+    --input:        152 15% 20%;
+    --ring:         152 40% 50%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar fina (Kanban) */
+  .kanban-scroll::-webkit-scrollbar { height: 6px; }
+  .kanban-scroll::-webkit-scrollbar-track { @apply bg-transparent; }
+  .kanban-scroll::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+}

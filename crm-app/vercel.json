@@ -1,0 +1,21 @@
+{
+  "crons": [
+    {
+      "path":     "/api/cron/lgpd-purge",
+      "schedule": "0 2 1 * *"
+    },
+    {
+      "path":     "/api/cron/whatsapp-retry",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path":     "/api/cron/webchat-expire",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "functions": {
+    "app/api/cron/lgpd-purge/route.ts":    { "maxDuration": 300 },
+    "app/api/cron/whatsapp-retry/route.ts": { "maxDuration": 30  },
+    "app/api/cron/webchat-expire/route.ts": { "maxDuration": 30  }
+  }
+}
