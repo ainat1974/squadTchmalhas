@@ -32,7 +32,7 @@ export function LeadTimeline({ interactions }: { interactions: InteractionItem[]
   return (
     <ul className="space-y-4">
       {interactions.map((item) => {
-        const config = CHANNEL_CONFIG[item.channel] ?? CHANNEL_CONFIG.manual
+        const config = CHANNEL_CONFIG[item.channel] ?? CHANNEL_CONFIG.manual!
         const Icon = config.icon
         const isInbound = item.direction === 'inbound'
 

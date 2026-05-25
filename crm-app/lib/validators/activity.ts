@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const CreateActivitySchema = z.object({
+const ActivityBaseSchema = z.object({
   dealId:      z.string().uuid().optional(),
   contactId:   z.string().uuid().optional(),
   type:        z.enum(['task', 'call', 'meeting', 'email', 'note', 'whatsapp', 'instagram']),
@@ -8,12 +8,14 @@ export const CreateActivitySchema = z.object({
   description: z.string().max(5000).optional(),
   dueDate:     z.string().datetime().optional(),
   assignedTo:  z.string().uuid().optional(),
-}).refine(
+})
+
+export const CreateActivitySchema = ActivityBaseSchema.refine(
   (d) => d.dealId || d.contactId,
   { message: 'Informe dealId ou contactId' },
 )
 
-export const UpdateActivitySchema = CreateActivitySchema.partial()
+export const UpdateActivitySchema = ActivityBaseSchema.partial()
 
 export const ListActivitiesSchema = z.object({
   page:      z.coerce.number().int().min(1).default(1),

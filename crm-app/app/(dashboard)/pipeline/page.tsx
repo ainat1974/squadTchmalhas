@@ -48,6 +48,33 @@ export default async function PipelinePage({ searchParams }: Props) {
 
   if (!pipeline) return <div className="p-8 text-muted-foreground">Pipeline não configurado.</div>
 
+  const pipelineForBoard = {
+    id:     pipeline.id,
+    name:   pipeline.name,
+    type:   pipeline.type,
+    stages: pipeline.stages.map((stage) => ({
+      id:          stage.id,
+      name:        stage.name,
+      color:       stage.color,
+      probability: stage.probability,
+      isWonStage:  stage.isWonStage,
+      isLostStage: stage.isLostStage,
+      deals:       stage.deals.map((deal) => ({
+        id:         deal.id,
+        title:      deal.title,
+        value:      deal.value != null ? Number(deal.value) : null,
+        stageId:    deal.stageId,
+        contact:    deal.contact,
+        owner:      deal.owner,
+        activities: deal.activities.map((a) => ({
+          id:      a.id,
+          title:   a.title,
+          dueDate: a.dueDate?.toISOString() ?? null,
+        })),
+      })),
+    })),
+  }
+
   const showTabs = ['admin', 'gestor'].includes(user.role)
 
   return (
@@ -73,7 +100,7 @@ export default async function PipelinePage({ searchParams }: Props) {
         )}
       </div>
 
-      <KanbanBoard pipeline={pipeline} currentUser={{ id: user.id, role: user.role }} />
+      <KanbanBoard pipeline={pipelineForBoard} currentUser={{ id: user.id, role: user.role }} />
     </div>
   )
 }

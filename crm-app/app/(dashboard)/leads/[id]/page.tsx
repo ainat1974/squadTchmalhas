@@ -19,15 +19,20 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import { ApiError } from '@/lib/errors'
+import type { DealStatus } from '@prisma/client'
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
-const DEAL_STATUS: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  open:  { label: 'Aberto', variant: 'default' },
-  won:   { label: 'Ganho', variant: 'secondary' },
-  lost:  { label: 'Perdido', variant: 'destructive' },
+const DEAL_STATUS = {
+  open:  { label: 'Aberto', variant: 'default' as const },
+  won:   { label: 'Ganho', variant: 'secondary' as const },
+  lost:  { label: 'Perdido', variant: 'destructive' as const },
+} satisfies Record<DealStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }>
+
+function dealStatusInfo(status: DealStatus) {
+  return DEAL_STATUS[status]
 }
 
 export default async function LeadDetailPage({ params }: Props) {
@@ -230,7 +235,7 @@ export default async function LeadDetailPage({ params }: Props) {
               ) : (
                 <ul className="space-y-2">
                   {contact.deals.map((deal) => {
-                    const status = DEAL_STATUS[deal.status] ?? DEAL_STATUS.open
+                    const status = dealStatusInfo(deal.status)
                     return (
                       <li
                         key={deal.id}

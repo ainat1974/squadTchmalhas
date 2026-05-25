@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const phoneRegex = /^\+?[1-9]\d{8,14}$/
 
-export const CreateContactSchema = z.object({
+const ContactBaseSchema = z.object({
   fullName:          z.string().min(1).max(200),
   email:             z.string().email().optional().or(z.literal('')),
   phone:             z.string().regex(phoneRegex, 'Telefone inválido (formato E.164)').optional(),
@@ -18,7 +18,9 @@ export const CreateContactSchema = z.object({
   lgpdConsent:       z.boolean(),
   tags:              z.array(z.string()).default([]),
   notes:             z.string().max(5000).optional(),
-}).refine(
+})
+
+export const CreateContactSchema = ContactBaseSchema.refine(
   (d) => d.email || d.phone || d.whatsappPhone,
   { message: 'Informe ao menos email, telefone ou WhatsApp' },
 ).refine(
@@ -26,7 +28,7 @@ export const CreateContactSchema = z.object({
   { message: 'Consentimento LGPD obrigatório', path: ['lgpdConsent'] },
 )
 
-export const UpdateContactSchema = CreateContactSchema.partial().omit({ lgpdConsent: true })
+export const UpdateContactSchema = ContactBaseSchema.partial().omit({ lgpdConsent: true })
 
 export const ListContactsSchema = z.object({
   page:     z.coerce.number().int().min(1).default(1),
