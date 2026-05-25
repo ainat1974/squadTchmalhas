@@ -5,11 +5,18 @@ import {
   Plus,
   Filter,
   AlertTriangle,
-  MessageSquare,
-  Phone,
   Calendar,
   ChevronDown,
+  Star,
+  LayoutDashboard,
+  KanbanSquare,
+  Users,
+  MessageSquare,
+  CheckSquare,
+  Settings,
+  ChevronRight,
 } from 'lucide-react'
+import { BrandMark } from '@/components/brand/BrandMark'
 
 type Deal = {
   id: string
@@ -17,58 +24,64 @@ type Deal = {
   company: string
   value: number
   owner: string
-  ownerColor: string
   daysInStage: number
   hasOverdueTask?: boolean
   pendingTask?: string
   channel?: 'whatsapp' | 'instagram' | 'webchat'
+  hot?: boolean
 }
 
-const stagesAtacado: { id: string; label: string; color: string; deals: Deal[] }[] = [
+type Stage = {
+  id: string
+  label: string
+  chip: string
+  deals: Deal[]
+}
+
+const stagesAtacado: Stage[] = [
   {
-    id: 'novo',
-    label: 'Novo Lead',
-    color: 'bg-slate-100 border-slate-300',
+    id: 'novo', label: 'Novo Lead', chip: 'stage-chip-new',
     deals: [
-      { id: '1', title: 'Pedido 50 camisetas básicas', company: 'Loja Sul Boutique', value: 2450, owner: 'V', ownerColor: 'bg-blue-500', daysInStage: 2, channel: 'whatsapp' },
-      { id: '2', title: 'Avaliação Polo Masculina', company: 'Moda da Mile', value: 5890, owner: 'V', ownerColor: 'bg-blue-500', daysInStage: 1, channel: 'instagram' },
-      { id: '3', title: 'Catálogo Coleção Copa 2026', company: 'Esporte Total SP', value: 8900, owner: 'A', ownerColor: 'bg-orange-500', daysInStage: 3 },
+      { id: '1', title: 'Pedido 50 camisetas básicas', company: 'Loja Sul Boutique', value: 2450, owner: 'V', daysInStage: 2, channel: 'whatsapp' },
+      { id: '2', title: 'Avaliação Polo Masculina', company: 'Moda da Mile', value: 5890, owner: 'V', daysInStage: 1, channel: 'instagram' },
+      { id: '3', title: 'Catálogo Coleção Copa 2026', company: 'Esporte Total SP', value: 8900, owner: 'A', daysInStage: 3 },
     ],
   },
   {
-    id: 'contato',
-    label: 'Contato Inicial',
-    color: 'bg-blue-50 border-blue-200',
+    id: 'contato', label: 'Contato Inicial', chip: 'stage-chip-contact',
     deals: [
-      { id: '4', title: 'Pedido camisetas Dryfit', company: 'Magazine Anjo', value: 12500, owner: 'V', ownerColor: 'bg-blue-500', daysInStage: 5, hasOverdueTask: true, pendingTask: 'Enviar proposta por WhatsApp' },
-      { id: '5', title: 'Avaliação revenda', company: 'Boutique Glow', value: 8200, owner: 'V', ownerColor: 'bg-blue-500', daysInStage: 4 },
+      { id: '4', title: 'Pedido camisetas Dryfit', company: 'Magazine Anjo', value: 12500, owner: 'V', daysInStage: 5, hasOverdueTask: true, pendingTask: 'Enviar proposta', hot: true },
+      { id: '5', title: 'Avaliação revenda', company: 'Boutique Glow', value: 8200, owner: 'V', daysInStage: 4 },
     ],
   },
   {
-    id: 'proposta',
-    label: 'Proposta Enviada',
-    color: 'bg-amber-50 border-amber-200',
+    id: 'proposta', label: 'Proposta Enviada', chip: 'stage-chip-proposal',
     deals: [
-      { id: '6', title: 'Kit 100 Polo Masculina', company: 'SP Mais Atacado', value: 45200, owner: 'A', ownerColor: 'bg-orange-500', daysInStage: 7, hasOverdueTask: true, pendingTask: 'Ligar de retorno' },
+      { id: '6', title: 'Kit 100 Polo Masculina', company: 'SP Mais Atacado', value: 45200, owner: 'A', daysInStage: 7, hasOverdueTask: true, pendingTask: 'Ligar de retorno', hot: true, channel: 'whatsapp' },
     ],
   },
   {
-    id: 'negociacao',
-    label: 'Negociação',
-    color: 'bg-orange-50 border-orange-200',
+    id: 'negociacao', label: 'Negociação', chip: 'stage-chip-negotiation',
     deals: [
-      { id: '7', title: 'Contrato anual revenda', company: 'Distribuidora MS', value: 89500, owner: 'V', ownerColor: 'bg-blue-500', daysInStage: 10 },
+      { id: '7', title: 'Contrato anual revenda', company: 'Distribuidora MS', value: 89500, owner: 'V', daysInStage: 10, hot: true },
     ],
   },
   {
-    id: 'ganho',
-    label: 'Ganho',
-    color: 'bg-emerald-100 border-emerald-300',
+    id: 'ganho', label: 'Ganho', chip: 'stage-chip-won',
     deals: [
-      { id: '8', title: 'Pedido 200 camisetas', company: 'Loja Verão SP', value: 9800, owner: 'A', ownerColor: 'bg-orange-500', daysInStage: 1 },
-      { id: '9', title: 'Coleção Copa 2026 50un', company: 'Esporte Cidade', value: 4200, owner: 'V', ownerColor: 'bg-blue-500', daysInStage: 2 },
+      { id: '8', title: 'Pedido 200 camisetas', company: 'Loja Verão SP', value: 9800, owner: 'A', daysInStage: 1, channel: 'whatsapp' },
+      { id: '9', title: 'Coleção Copa 50un', company: 'Esporte Cidade', value: 4200, owner: 'V', daysInStage: 2 },
     ],
   },
+]
+
+const NAV_ITEMS = [
+  { label: 'Dashboard', icon: LayoutDashboard, active: false },
+  { label: 'Pipeline',  icon: KanbanSquare,    active: true  },
+  { label: 'Leads',     icon: Users,           active: false },
+  { label: 'Chat',      icon: MessageSquare,   active: false },
+  { label: 'Tarefas',   icon: CheckSquare,     active: false },
+  { label: 'Configurações', icon: Settings,    active: false },
 ]
 
 export default function PreviewKanbanPage() {
@@ -77,134 +90,186 @@ export default function PreviewKanbanPage() {
   const totalValue = stagesAtacado.flatMap((s) => s.deals).reduce((s, d) => s + d.value, 0)
 
   return (
-    <div className="h-[calc(100vh-40px)] flex flex-col">
-      {/* ─── Header ──────────────────────────────────────── */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3">
-        <div className="flex items-center justify-between mb-3">
+    <div className="bg-canvas flex min-h-screen text-fg-primary">
+      {/* Sidebar */}
+      <aside className="bg-card hidden w-60 flex-shrink-0 flex-col border-r border-sutil md:flex">
+        <div className="flex h-20 items-center justify-center border-b border-sutil px-6">
+          <BrandMark variant="sidebar" />
+        </div>
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              className={[
+                'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+                item.active
+                  ? 'border border-gold-soft bg-brand-gold/10 text-brand-gold shadow-[inset_0_1px_0_hsla(0,0%,100%,0.04)]'
+                  : 'border border-transparent text-fg-muted hover:border-sutil hover:bg-elevated hover:text-fg-primary',
+              ].join(' ')}
+            >
+              <item.icon className="h-5 w-5" />
+              {item.label}
+              {item.active && <ChevronRight className="ml-auto h-4 w-4 text-brand-gold opacity-80" />}
+            </button>
+          ))}
+        </nav>
+        <div className="border-t border-sutil p-3">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-elevated"
+          >
+            <span className="brand-tm-avatar">TM</span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-fg-primary">Tania Maria</p>
+              <p className="truncate text-xs text-fg-muted">Administrador</p>
+            </div>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="flex h-screen flex-1 flex-col overflow-hidden">
+        {/* Top bar */}
+        <div className="filter-bar-sticky flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-bold">T</div>
-            <h1 className="font-bold text-slate-900">Pipeline</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-fg-primary">Pipeline</h1>
+            <span className="text-xs uppercase tracking-wider text-fg-muted">· {pipelineType === 'atacado' ? 'Atacado' : 'Varejo'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button className="text-sm text-slate-600 hover:text-emerald-700 flex items-center gap-1">
-              <Filter className="w-4 h-4" /> Filtros
+            <button type="button" className="flex items-center gap-1.5 rounded-md border border-sutil bg-sunken px-3 py-2 text-sm text-fg-secondary hover:border-gold-soft hover:text-brand-gold">
+              <Filter className="h-4 w-4" /> Filtros
             </button>
-            <button className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium px-4 py-1.5 rounded-lg flex items-center gap-1.5">
-              <Plus className="w-4 h-4" /> Novo Deal
+            <button type="button" className="btn-primary-premium flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-semibold">
+              <Plus className="h-4 w-4" /> Novo Deal
             </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="flex bg-slate-100 rounded-lg p-0.5">
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-sutil bg-card px-6 py-3">
+          <div className="flex items-center gap-3">
+            <div className="bg-sunken flex rounded-lg border border-sutil p-0.5">
               {(['atacado', 'varejo'] as const).map((t) => (
                 <button
                   key={t}
+                  type="button"
                   onClick={() => setPipelineType(t)}
-                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  className={[
+                    'rounded-md px-4 py-1.5 text-sm font-medium transition-all',
                     pipelineType === t
-                      ? 'bg-white text-emerald-700 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                      ? 'bg-brand-gold/15 text-brand-gold'
+                      : 'text-fg-muted hover:text-fg-primary',
+                  ].join(' ')}
                 >
-                  {t === 'atacado' ? '🏢 Atacado' : '🛍️ Varejo'}
+                  {t === 'atacado' ? 'Atacado' : 'Varejo'}
                 </button>
               ))}
             </div>
-            <button className="text-sm text-slate-600 flex items-center gap-1 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-50">
-              Meus deals <ChevronDown className="w-3.5 h-3.5" />
+            <button type="button" className="flex items-center gap-1 rounded-md border border-sutil bg-sunken px-3 py-1.5 text-sm text-fg-secondary hover:border-gold-soft">
+              Meus deals <ChevronDown className="h-3.5 w-3.5" />
             </button>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="text-slate-600">
-              <strong className="text-slate-900">{totalDeals}</strong> deals
+          <div className="flex items-center gap-5 text-sm">
+            <div className="text-fg-muted">
+              <strong className="font-kpi text-fg-primary">{totalDeals}</strong> deals
             </div>
-            <div className="text-slate-600">
-              Total: <strong className="text-emerald-700">
+            <div className="text-fg-muted">
+              Total: <strong className="font-kpi text-brand-gold">
                 {totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </strong>
             </div>
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-fg-muted" />
               <input
-                placeholder="Buscar..."
-                className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Buscar…"
+                className="bg-sunken input-focus-glow h-9 w-48 rounded-md border border-sutil pl-8 pr-3 text-sm text-fg-primary placeholder:text-fg-muted"
               />
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ─── Kanban ──────────────────────────────────────── */}
-      <div className="flex-1 overflow-x-auto bg-slate-50 p-4">
-        <div className="flex gap-3 min-w-max h-full">
-          {stagesAtacado.map((stage) => (
-            <div key={stage.id} className="w-72 flex-shrink-0 flex flex-col">
-              <div className={`${stage.color} border rounded-t-lg p-3 flex items-center justify-between`}>
-                <div className="font-semibold text-sm text-slate-800">{stage.label}</div>
-                <div className="text-xs bg-white/60 px-2 py-0.5 rounded-full font-medium text-slate-700">
-                  {stage.deals.length}
+        {/* Kanban */}
+        <div className="kanban-scroll flex-1 overflow-x-auto p-4">
+          <div className="flex h-full min-w-max gap-3">
+            {stagesAtacado.map((stage) => (
+              <div key={stage.id} className="flex w-72 flex-shrink-0 flex-col">
+                <div className="bg-card mb-2 flex items-center justify-between rounded-lg border border-sutil px-3 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className={['rounded-full px-2 py-0.5 text-xs font-medium', stage.chip].join(' ')}>
+                      {stage.label}
+                    </span>
+                  </div>
+                  <span className="font-kpi text-xs text-fg-muted">{stage.deals.length}</span>
+                </div>
+                <div className="bg-sunken flex-1 space-y-2 overflow-y-auto rounded-lg border border-sutil p-2">
+                  {stage.deals.map((deal) => (
+                    <DealCard key={deal.id} deal={deal} />
+                  ))}
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-sutil py-2 text-xs text-fg-muted transition-colors hover:border-gold-soft hover:text-brand-gold"
+                  >
+                    <Plus className="h-3 w-3" /> Adicionar
+                  </button>
                 </div>
               </div>
-              <div className="flex-1 bg-slate-100/60 p-2 space-y-2 rounded-b-lg overflow-y-auto">
-                {stage.deals.map((deal) => (
-                  <DealCard key={deal.id} deal={deal} />
-                ))}
-                <button className="w-full py-2 text-xs text-slate-500 hover:bg-white rounded-lg flex items-center justify-center gap-1 border border-dashed border-slate-300">
-                  <Plus className="w-3 h-3" /> Adicionar
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+
+        <button type="button" className="fab-gold" aria-label="Novo deal">
+          <Plus className="h-6 w-6" />
+        </button>
+      </main>
     </div>
   )
 }
 
 function DealCard({ deal }: { deal: Deal }) {
-  const channels = {
-    whatsapp: { icon: MessageSquare, color: 'text-green-600' },
-    instagram: { icon: MessageSquare, color: 'text-pink-600' },
-    webchat: { icon: MessageSquare, color: 'text-blue-600' },
+  const channelDot: Record<NonNullable<Deal['channel']>, string> = {
+    whatsapp:  'channel-dot-whatsapp',
+    instagram: 'channel-dot-instagram',
+    webchat:   'channel-dot-webchat',
   }
+
   return (
-    <div className={`bg-white rounded-lg p-3 shadow-sm border hover:shadow-md transition-shadow cursor-grab ${
-      deal.hasOverdueTask ? 'border-amber-300' : 'border-slate-200'
-    }`}>
-      <div className="flex items-start justify-between mb-1.5">
-        <div className="font-medium text-sm text-slate-900 leading-tight">{deal.title}</div>
+    <div className="card-interactive group cursor-grab p-3">
+      <div className="mb-1.5 flex items-start justify-between gap-1">
+        <div className="flex items-start gap-1.5">
+          {deal.hot && <Star className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 fill-brand-gold text-brand-gold" />}
+          <div className="text-sm font-medium leading-tight text-fg-primary">{deal.title}</div>
+        </div>
         {deal.hasOverdueTask && (
-          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 ml-1" />
+          <AlertTriangle className="h-4 w-4 flex-shrink-0 text-metric-negative" />
         )}
       </div>
-      <div className="text-xs text-slate-500 mb-2">{deal.company}</div>
+      <div className="mb-2 text-xs text-fg-muted">{deal.company}</div>
 
       {deal.pendingTask && (
-        <div className="mb-2 px-2 py-1 bg-amber-50 border border-amber-200 rounded text-[10px] text-amber-900 flex items-center gap-1">
-          <AlertTriangle className="w-3 h-3" />
+        <div className="mb-2 flex items-center gap-1 rounded border border-metric-negative-soft bg-metric-negative-soft px-2 py-1 text-[10px] text-metric-negative">
+          <AlertTriangle className="h-3 w-3" />
           <span className="font-medium">Obrigatória:</span> {deal.pendingTask}
         </div>
       )}
 
       <div className="flex items-center justify-between">
-        <div className="text-sm font-semibold text-emerald-700">
+        <div className="font-kpi text-sm font-semibold text-brand-gold">
           {deal.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
         </div>
         <div className="flex items-center gap-1.5">
-          {deal.channel && (() => {
-            const Ch = channels[deal.channel].icon
-            return <Ch className={`w-3 h-3 ${channels[deal.channel].color}`} />
-          })()}
-          <div className={`w-5 h-5 rounded-full ${deal.ownerColor} text-white text-[10px] font-bold flex items-center justify-center`}>
+          {deal.channel && <span className={['channel-dot', channelDot[deal.channel]].join(' ')} />}
+          <span
+            className="brand-tm-avatar"
+            style={{ width: 22, height: 22, fontSize: 10 }}
+          >
             {deal.owner}
-          </div>
+          </span>
         </div>
       </div>
-      <div className="text-[10px] text-slate-400 mt-1.5 flex items-center gap-1">
-        <Calendar className="w-2.5 h-2.5" />
-        {deal.daysInStage}d nesta etapa
+      <div className="mt-1.5 flex items-center gap-1 text-[10px] text-fg-muted">
+        <Calendar className="h-2.5 w-2.5" />
+        <span className="font-kpi">{deal.daysInStage}d nesta etapa</span>
       </div>
     </div>
   )
