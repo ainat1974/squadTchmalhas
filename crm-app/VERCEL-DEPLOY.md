@@ -105,6 +105,7 @@ Funcionam apenas no **plano Pro** da Vercel (~R$ 104/mês). No Free, o app funci
 | Erro | Solução |
 |---|---|
 | Build falha em `prisma generate` | Confirme `DATABASE_URL` e `DIRECT_URL` nas env vars |
+| `500 MIDDLEWARE_INVOCATION_FAILED` | Confirme env vars Supabase na Vercel; o app usa `proxy.ts` (Next.js 16), não `middleware.ts` |
 | Login não funciona | Atualize Redirect URLs no Supabase |
 | 404 em rotas | Root Directory deve ser `crm-app` |
 | Página em branco | Verifique `NEXT_PUBLIC_SUPABASE_URL` e anon key |
