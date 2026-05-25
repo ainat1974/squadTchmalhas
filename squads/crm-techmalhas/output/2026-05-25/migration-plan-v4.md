@@ -1,8 +1,12 @@
 # Plano de Migração v3 → v4 — Para Fábio Fullstack
 
-> **Autor:** Davi Designer · **Data:** 2026-05-25
+> **Autor:** Davi Designer · **Data:** 2026-05-25 (rev. pós-decisão Tania)
 > **Companion:** `design-system-v4.md` · `globals-css-v4.patch.md` · `wireframes-v4.md`
 > **Premissa:** branch separada `feat/design-system-v4` com PR único; Quésia valida ao final; deploy só após aprovação da Tania.
+> **Decisões da Tania incorporadas:**
+> - ✅ Verde → Preto `#141414` (primary CTA)
+> - ❌ Glassmorphism rejeitado (paridade cross-device) → substituído por `.surface-premium` sólida + `.border-gradient-brand`
+> - ✅ Dark mode **firmado dentro da v4** (T13 não é opcional)
 
 ---
 
@@ -22,7 +26,13 @@ Princípio: **fazer o app inteiro mudar de cor com 2 arquivos**, depois polir co
 
 ---
 
-## Tarefas (estimativa total: 14–18h)
+## Tarefas (estimativa total: 14–17h, target 15h)
+
+> **Recalculo pós-decisão Tania:**
+> - **−1h** sem glassmorphism (não precisa setup `@supports`, nem testar fallback Safari)
+> - **+0h** sage substitui glass com `.surface-premium` no mesmo lugar de classes (mesmo esforço)
+> - **+1.5h** dark mode firmado (T13 era opcional v3, agora obrigatório)
+> - **Saldo: ~+0.5h** vs estimativa anterior (16h → 15h target, faixa 14–17h)
 
 > Cada Tn tem: o que fazer · arquivos · horas estimadas · critério de "feito".
 
@@ -114,19 +124,19 @@ const mono = JetBrains_Mono({
 
 ---
 
-### T4 — Refactor `Sidebar.tsx` (glass + ink + tokens novos)
+### T4 — Refactor `Sidebar.tsx` (surface-premium + ink + tokens novos)
 
-**O que:** substituir as classes literais `bg-brand-500` por tokens da v4, adicionar `.glass`, ativo gold.
+**O que:** substituir as classes literais `bg-brand-500` por tokens da v4, aplicar `.surface-premium`, ativo gold.
 
 **Arquivos:** `crm-app/components/layout/Sidebar.tsx`
 
 **Mudanças (StrReplace por seção):**
 
 ```tsx
-// 1) Container <aside>: ganha .glass + border refinada
-<aside className="flex h-full w-60 flex-col border-r border-border/60 glass">
+// 1) Container <aside>: ganha .surface-premium + border-r sutil
+<aside className="surface-premium flex h-full w-60 flex-col border-r border-border/60">
 
-// 2) Logo container — bg de brand-500 vira preto explícito + cantos refinados
+// 2) Logo container — bg de brand-500 vira preto explícito
 <div className="flex h-16 items-center gap-3 border-b border-border/60 px-6">
   <TechmalhasLogo variant="mark" className="h-8 w-8" />
   <span className="font-hind font-semibold text-foreground">Techmalhas CRM</span>
@@ -151,15 +161,15 @@ const mono = JetBrains_Mono({
 </Link>
 ```
 
-**Critério de feito:** sidebar com fundo glass, item ativo preto com dot dourado, hover suave com `translate-x`.
+**Critério de feito:** sidebar com `.surface-premium` (inner highlight + sombra sage), item ativo preto com dot dourado, hover suave com `translate-x`.
 
-**Horas:** **2h**
+**Horas:** **1.5h** (−0.5h vs versão com glass — não tem fallback para testar)
 
 ---
 
-### T5 — Refactor `Login` (mesh hero + glass card + ink CTA)
+### T5 — Refactor `Login` (mesh hero + surface-premium-gold card + ink CTA)
 
-**O que:** reescrever a tela de login conforme wireframe 1.
+**O que:** reescrever a tela de login conforme wireframe 1 — sem glass, com surface sólida premium + border-gradient + sombra gold dupla.
 
 **Arquivos:** `crm-app/app/(auth)/login/page.tsx`
 
@@ -168,17 +178,17 @@ const mono = JetBrains_Mono({
 ```tsx
 // Container principal
 <div className="relative min-h-screen overflow-hidden bg-hero-mesh">
-  {/* 3 orbs animados (pointer-events-none, absolute) */}
+  {/* 3 orbs animados (pointer-events-none, absolute) — opacidade 25-30% */}
   <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96
-                  rounded-full bg-brand-gold/25 blur-3xl animate-orb-drift" />
+                  rounded-full bg-brand-gold/30 blur-3xl animate-orb-drift" />
   <div className="pointer-events-none absolute top-1/3 -right-40 h-[28rem] w-[28rem]
-                  rounded-full bg-brand-sage/30 blur-3xl animate-orb-drift-slow" />
+                  rounded-full bg-brand-sage/35 blur-3xl animate-orb-drift-slow" />
   <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80
-                  rounded-full bg-brand-terracotta/15 blur-3xl animate-orb-drift" />
+                  rounded-full bg-brand-terracotta/18 blur-3xl animate-orb-drift" />
 
-  {/* Card glass com shadow gold */}
+  {/* Card SÓLIDO com border-gradient + surface-premium-gold (sem glass) */}
   <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
-    <Card className="glass shadow-gold w-full max-w-sm">
+    <Card className="surface-premium-gold border-gradient-brand w-full max-w-sm rounded-xl">
       <CardHeader>
         <TechmalhasLogo variant="mark" className="mx-auto h-12 w-12" />
         <CardTitle className="text-center font-hind text-2xl font-bold text-foreground">
@@ -190,15 +200,13 @@ const mono = JetBrains_Mono({
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleEmailLogin} className="space-y-3">
-          {/* inputs ganham .input-focus-glow */}
+          {/* inputs com .input-focus-glow + ring-pulse */}
           <Input className="input-focus-glow" />
-          {/* botão: bg-foreground (ink), hover ganha shadow-ink-glow + -translate-y-0.5 */}
+          {/* botão primary com sombra dupla (gold-glow + ink-shadow) */}
           <Button
             type="submit"
-            className="w-full bg-foreground text-background
-                       transition-all duration-fast
-                       hover:bg-foreground/95 hover:-translate-y-0.5 hover:shadow-ink-glow
-                       active:translate-y-0 active:scale-[0.98]"
+            className="btn-primary-premium w-full bg-foreground text-background
+                       hover:bg-foreground/95"
           >
             {loading ? 'Entrando…' : 'Entrar'}
           </Button>
@@ -217,18 +225,19 @@ const mono = JetBrains_Mono({
 ```
 
 **Critério de feito:**
-- Mesh visível mas discreto (não ofusca form).
-- Card transparente com blur.
-- CTA preto com hover que "levanta".
-- Lighthouse perf não degrada > 5pts (orbs estão em GPU).
+- Mesh visível mas discreto (não ofusca form); 3 orbs animam com `animate-orb-drift`.
+- Card **sólido** com inner highlight 3D + sombra gold + border-gradient gold→sage visível.
+- CTA preto com **sombra dupla** (gold-glow + ink-shadow) no repouso; hover intensifica.
+- Inputs com ring-pulse gold 1× ao focar.
+- Lighthouse perf não degrada > 5pts (orbs estão em GPU; sem backdrop-filter = menos custo).
 
-**Horas:** **3h**
+**Horas:** **2.5h** (−0.5h sem glass)
 
 ---
 
-### T6 — Refactor `Button` (variants `default` ink + `gold` + `glass`)
+### T6 — Refactor `Button` (variants `default` ink premium + `gold` + sombras duplas)
 
-**O que:** atualizar `components/ui/button.tsx` para incluir variantes da v4.
+**O que:** atualizar `components/ui/button.tsx` para incluir variantes da v4 — variante `glass` REMOVIDA.
 
 **Arquivos:** `crm-app/components/ui/button.tsx`
 
@@ -244,17 +253,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:     'bg-foreground text-background hover:bg-foreground/95 ' +
-                     'hover:-translate-y-0.5 hover:shadow-ink-glow',
+        // primary: sombra dupla gold+ink desde o repouso, hover intensifica
+        default:     'btn-primary-premium bg-foreground text-background hover:bg-foreground/95',
         gold:        'bg-brand-gold text-foreground hover:bg-brand-gold-hover ' +
-                     'hover:-translate-y-0.5 hover:shadow-gold',
+                     'shadow-gold hover:shadow-gold-lift',
         destructive: 'bg-destructive text-destructive-foreground ' +
                      'hover:bg-destructive/90 hover:shadow-terracotta',
-        outline:     'border border-border bg-transparent hover:bg-secondary',
+        outline:     'border border-border bg-transparent hover:bg-secondary hover:border-brand-sage/50',
         secondary:   'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost:       'hover:bg-secondary hover:text-foreground',
         link:        'text-foreground underline-offset-4 hover:underline p-0 h-auto',
-        glass:       'glass text-foreground hover:bg-card/90',
       },
       size: {
         sm:        'h-8 px-3 text-xs',
@@ -269,15 +277,15 @@ const buttonVariants = cva(
 )
 ```
 
-**Critério de feito:** Storybook ou página de teste renderiza as 8 variantes sem regressão.
+**Critério de feito:** página de teste renderiza as 7 variantes (sem `glass`) sem regressão; primary tem sombra dupla visível em repouso.
 
 **Horas:** **1.5h**
 
 ---
 
-### T7 — Refactor `Card` (variants `glass`, `feature`)
+### T7 — Refactor `Card` (variants `premium`, `feature`, `elevated`)
 
-**O que:** adicionar variantes `glass` (sidebar/drawer) e `feature` (KPI destaque) no Card.
+**O que:** adicionar variantes da v4 no Card — variante `glass` removida; entram `premium`, `feature`, `elevated`.
 
 **Arquivos:** `crm-app/components/ui/card.tsx`
 
@@ -287,50 +295,49 @@ const buttonVariants = cva(
 import { cva } from 'class-variance-authority'
 
 const cardVariants = cva(
-  'rounded-md border border-border bg-card text-card-foreground transition-all duration-fast',
+  'rounded-md text-card-foreground',
   {
     variants: {
       variant: {
-        default: 'shadow-sm',
-        elevated: 'shadow-sage hover:shadow-gold hover:-translate-y-0.5',
-        glass:    'glass shadow-sage',
-        feature:  'bg-kpi-feature shadow-gold ring-1 ring-brand-gold/20',
-        ghost:    'border-transparent shadow-none',
+        default:  'bg-card border border-border shadow-sm',
+        premium:  'surface-premium',
+        elevated: 'surface-premium hover:shadow-sage-lift',
+        feature:  'surface-premium-gold border-gradient-feature rounded-xl',
+        ghost:    'border-transparent shadow-none bg-transparent',
       },
     },
     defaultVariants: { variant: 'default' },
   }
 )
-
-// Card recebe prop variant via interface
 ```
 
-**Critério de feito:** KPI cards do dashboard usam `variant="elevated"`; KPI de receita usa `variant="feature"`.
+**Critério de feito:** KPI cards 1-3 do dashboard usam `variant="elevated"`; KPI de receita usa `variant="feature"`; sidebar/drawers usam `variant="premium"`.
 
 **Horas:** **1.5h**
 
 ---
 
-### T8 — Refactor Dashboard (KPI cards + stagger + funnel)
+### T8 — Refactor Dashboard (KPI cards + stagger elaborado + funnel + KPI glow)
 
-**O que:** aplicar variantes de Card, fonte mono nos números, Framer Motion stagger.
+**O que:** aplicar variantes de Card, fonte mono nos números com glow gold no hover, Framer Motion stagger.
 
 **Arquivos:** `crm-app/app/(dashboard)/dashboard/page.tsx` + `components/dashboard/KpiCard.tsx`
 
 **Mudanças:**
 1. `<KpiCard variant="elevated">` para 3 primeiros; `variant="feature"` para o de receita.
-2. Valor numérico: `<span className="font-kpi text-3xl font-semibold">R$ 67.5k</span>`.
-3. Wrapper com Framer Motion `staggerChildren: 0.05`.
+2. Valor numérico: `<span className="font-kpi font-kpi-glow text-3xl font-semibold">R$ 67.5k</span>` — ganha glow gold ao hover do card (via `.group:hover`).
+3. Wrapper KPI grid com Framer Motion: `staggerChildren: 0.05`, item variant `opacity 0 + translateY 16px + scale 0.96 → final` em 220ms.
+4. Funnel bars com `scaleX 0 → 1` (transformOrigin left) em 400ms, stagger 80ms por barra.
 
-**Critério de feito:** dashboard carrega com cards entrando em cascata; números com tabular-nums.
+**Critério de feito:** dashboard carrega com cards entrando em cascata (200ms total); números com tabular-nums; hover de qualquer KPI card mostra glow gold sutil no número + lift -3px.
 
 **Horas:** **2h**
 
 ---
 
-### T9 — Refactor Kanban (cards opacos + drawer glass + drag shadow)
+### T9 — Refactor Kanban (cards opacos + drawer surface-premium-gold + drag shadow)
 
-**O que:** manter cards do Kanban **opacos** (não glass — afeta leitura), mas adicionar hover sage, drag shadow ink-glow, drawer glass.
+**O que:** manter cards do Kanban **opacos** (legibilidade), com hover lift; drawer sólido com surface-premium-gold.
 
 **Arquivos:**
 - `crm-app/components/pipeline/KanbanCard.tsx`
@@ -341,23 +348,30 @@ const cardVariants = cva(
 ```tsx
 <motion.div
   layout
-  whileHover={{ y: -2, scale: 1.01 }}
+  whileHover={{ y: -3, scale: 1.01 }}
   whileDrag={{ scale: 1.03, rotate: 1 }}
   transition={{ duration: 0.18, ease: [0, 0, 0.2, 1] }}
   className={cn(
     'rounded-md border border-border bg-card p-3',
-    'shadow-sm transition-shadow',
-    'hover:shadow-sage',
+    'shadow-sm transition-all duration-base',
+    'hover:shadow-sage-lift',  // ← classe v4: translate -3px + sombra
   )}
-  style={{ /* during drag, add shadow-ink-glow via style */ }}
+  style={isDragging ? { boxShadow: 'var(--shadow-ink-lift, …)' } : {}}
 >
   {/* ... */}
 </motion.div>
 ```
 
-**Mudanças LeadDetailDrawer:** trocar `SheetContent` para usar `.glass` no className.
+**Mudanças LeadDetailDrawer:** `SheetContent` recebe className `surface-premium-gold border-gradient-brand`.
 
-**Critério de feito:** cards levantam no hover; durante drag, sombra forte; drawer entra com blur.
+```tsx
+<SheetContent
+  side="right"
+  className="surface-premium-gold border-gradient-brand w-full sm:max-w-[480px]"
+>
+```
+
+**Critério de feito:** cards levantam 3px no hover com sombra sage; durante drag, sombra ink forte; drawer entra sólido com inner highlight + sombra gold (sem blur).
 
 **Horas:** **2h**
 
@@ -402,7 +416,7 @@ const bubbleClass = isReceived
 **Mudanças ChatInput:**
 
 ```tsx
-<div className="glass sticky bottom-0 border-t border-border/60 p-3">
+<div className="surface-premium sticky bottom-0 border-t border-border/60 p-3">
   <Input className="input-focus-glow" />
 </div>
 ```
@@ -410,7 +424,7 @@ const bubbleClass = isReceived
 **Mudanças ConversationHeader:**
 
 ```tsx
-<header className="glass sticky top-0 flex items-center gap-3 border-b border-border/60 p-3 z-10">
+<header className="surface-premium sticky top-0 flex items-center gap-3 border-b border-border/60 p-3 z-10">
   <Avatar ... />
   <div>
     <h2 className="font-hind font-semibold">{lead.name}</h2>
@@ -422,9 +436,9 @@ const bubbleClass = isReceived
 </header>
 ```
 
-**Critério de feito:** conversa visualmente diferenciada (recebida sage / enviada ink), presence pulsa, input com glow gold no focus.
+**Critério de feito:** conversa visualmente diferenciada (recebida sage / enviada ink), presence pulsa, input com ring-pulse gold no focus, header/sidebar sólidos com surface-premium.
 
-**Horas:** **2.5h**
+**Horas:** **2h** (−0.5h sem glass)
 
 ---
 
@@ -465,9 +479,9 @@ export function EmptyState({ icon, title, description, action }: Props) {
 
 ---
 
-### T13 — ThemeToggle (dark mode opt-in)
+### T13 — ThemeToggle (dark mode — **firmado dentro da v4**, não opcional)
 
-**O que:** adicionar toggle no `UserMenu` para alternar entre light/dark.
+**O que:** adicionar toggle no `UserMenu` para alternar entre light/dark. **Status: tarefa obrigatória v4** (Tania confirmou em 2026-05-25).
 
 **Arquivos:**
 - Instalar `next-themes` (se ainda não): `pnpm add next-themes`
@@ -501,9 +515,14 @@ const { theme, setTheme } = useTheme()
 </DropdownMenuItem>
 ```
 
-**Critério de feito:** toggle alterna sem flash de tema errado (FOUC) na primeira carga; preferência persiste em localStorage; default é light.
+**Critério de feito:**
+- Toggle alterna sem flash de tema errado (FOUC) na primeira carga.
+- Preferência persiste em localStorage.
+- Default é **light** (decisão `_memory/preferences.md`).
+- **Todas as surfaces** (`surface-premium`, `surface-premium-gold`, KPI cards, drawers, mensagens de chat, etc.) renderizam corretamente no dark.
+- Matriz de contraste WCAG AA do dark mode (ver `design-system-v4.md` §5) validada com axe DevTools antes do merge.
 
-**Horas:** **1.5h**
+**Horas:** **1.5h** (firmadas — não opcional)
 
 ---
 
@@ -591,9 +610,13 @@ Cada commit deve passar `pnpm typecheck && pnpm build` antes de ser empurrado.
 
 1. **Layout shift por troca de fonte:** Hind tem métricas diferentes de Inter. Fábio deve testar especialmente o login e botões com texto longo. Mitigação: `display: 'swap'` já configurado; fallback Inter tem stack próximo.
 
-2. **Performance de `backdrop-filter`:** Safari < 17 tem custo alto. Já temos fallback `@supports not`, mas testar em iPhone Vitor (modelo + iOS) para garantir 60fps na sidebar.
+2. ~~Performance de `backdrop-filter`~~ ✅ **RISCO ELIMINADO** — glassmorphism foi rejeitado pela Tania. Paridade cross-device 100% garantida.
 
-3. **Conflito de `--ring` gold com inputs em foco contínuo:** se Vitor digitar muito no Chat input, o glow gold pode irritar. Validar em sessão de uso real de 10 min.
+3. **Conflito de `ring-pulse` gold com inputs em foco contínuo:** o pulse é 1×, 600ms — não infinito. Se Vitor digitar muito no Chat input, o ring estabiliza após o pulse inicial. Validar em sessão de uso real de 10 min. Mitigação extra: `prefers-reduced-motion` desliga o pulse.
+
+4. **Dark mode FOUC** (Flash of Unstyled Content): `next-themes` configurado com `attribute="class"` pode flickerar entre temas no primeiro paint. Mitigação: `<script>` inline no `<head>` que aplica a classe antes do React hidratar (next-themes faz isso por padrão se setado corretamente).
+
+5. **Inner highlight branca no dark mode:** sem ajuste, a linha branca de `.surface-premium` no dark fica esquisita. Já mitigado no CSS: `.dark .surface-premium` troca para inner-highlight gold sutil (12% opacidade).
 
 ---
 
@@ -601,12 +624,35 @@ Cada commit deve passar `pnpm typecheck && pnpm build` antes de ser empurrado.
 
 | Faixa | Cenário |
 |---|---|
-| **14h** | Tudo correr bem, SVG do logo disponível, sem regressões inesperadas |
-| **16h** | Estimativa realista (inclui buffer para resolver 2-3 quirks de Safari) |
-| **18h** | Pior caso (logo precisa redesenhar + dark mode tem bug de FOUC) |
+| **14h** | Tudo correr bem, SVG do logo disponível, dark mode sem FOUC, sem regressões |
+| **15h** | **Estimativa target** (inclui buffer pequeno para resolver 1-2 quirks) |
+| **17h** | Pior caso (logo precisa redesenhar OU dark mode tem FOUC OU border-gradient renderiza diferente em Firefox) |
 
-**Recomendação:** alocar **16h** (2 dias úteis intensivos do Fábio) e estar disposto a deixar T13 (dark mode) para v4.1 se a tela do dia 2 for acabando.
+**Recomendação:** alocar **15h** (~2 dias úteis do Fábio). T13 (dark mode) é firmado — não pode ser cortado.
+
+**Soma analítica das horas:**
+
+| T | Tarefa | Horas |
+|---|---|---|
+| T1 | Tokens CSS + Tailwind config | 1.5 |
+| T2 | Configurar fontes Hind + Mono | 0.5 |
+| T3 | Logo SVG (variants) | 2.0 |
+| T4 | Sidebar (surface-premium) | 1.5 |
+| T5 | Login (mesh + premium-gold + ink CTA) | 2.5 |
+| T6 | Button variants | 1.5 |
+| T7 | Card variants | 1.5 |
+| T8 | Dashboard (KPI stagger + glow) | 2.0 |
+| T9 | Kanban (cards + drawer) | 2.0 |
+| T10 | Leads (table hover + avatar) | 2.0 |
+| T11 | Chat (bolhas + presence + input glow) | 2.0 |
+| T12 | Skeletons (shimmer gold) + Empty/Error | 2.0 |
+| T13 | Dark mode toggle (firmado) | 1.5 |
+| **Soma** | | **22.5h brutas** |
+| **Concorrência/reuso** | (estimativa Davi: 30% de tarefas se sobrepõem em refactors compartilhados) | **−7.5h** |
+| **Estimativa target** | | **~15h** |
+
+> O `21.5h - 30%` é estimativa conservadora baseada em reuso de tokens e componentes shadcn (uma vez que `Button` é atualizado, todos os 12+ call-sites herdam a mudança sem refactor adicional).
 
 ---
 
-*Plano de migração v4 — Davi Designer | 2026-05-25*
+*Plano de migração v4 — Davi Designer | 2026-05-25 (rev. pós-decisão Tania)*

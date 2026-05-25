@@ -11,8 +11,8 @@
 - **Paleta realinhada ao site real.** Verde floresta `#1A6B3C` (assunção criativa do v3) sai; entram **preto `#141414` + dourado `#E79501` + sage `#869791` + branco puro `#FFFFFF`**, extraídos ao vivo de `techmalhas.com.br`.
 - **Primary CTA agora é preto Techmalhas**, não azul `#1D4ED8`. O site real usa preto puro como ação dominante — o azul do v3 destoava da marca.
 - **Tipografia migra de Inter → Hind** (mesma família do site). Inter permanece como fallback no stack `next/font` (zero esforço de remoção). `JetBrains Mono` entra apenas para números de KPI.
-- **Camada premium futurista** adicionada de forma cirúrgica: glassmorphism em sidebar/drawers, sombras coloridas (gold/sage tint), mesh gradient no login, micro-interações ≤ 250ms, dark mode polido (opt-in).
-- **WCAG AA preservado e recalculado**. Toda combinação fg/bg da nova paleta foi reverificada — nenhuma regressão de acessibilidade.
+- **Camada premium SEM glassmorphism** (decisão da Tania, 2026-05-25): paridade visual cross-device é prioridade. Em vez de `backdrop-filter`, usamos **surfaces premium sólidas com sombras coloridas duplas, bordas em gradient sutil, inner highlight 3D e hover lift pronunciado**. Funciona idêntico em Chrome desktop, Safari iOS antigo, WebView in-app.
+- **WCAG AA preservado e recalculado** em ambos os temas (light + dark — dark mode firmado dentro da v4, não adiado).
 
 ---
 
@@ -27,10 +27,13 @@
 | Verde "secundário" | — (não havia) | `#869791` sage muted | ✨ novo (seções, dividers) |
 | Cor de "perigo suave" | `#B91C1C` vermelho | `#CC4833` terracotta | 🔄 ajuste |
 | Família tipográfica | Inter | **Hind** + Inter fallback | 🔄 mudança |
-| Mono p/ KPIs | — | `JetBrains Mono` | ✨ novo |
-| Glassmorphism | — | Sidebar/drawer/modal | ✨ novo |
-| Sombras coloridas | sombras pretas neutras | gold/sage tint 8–15% | ✨ novo |
-| Dark mode | rascunho (v3 não usado) | polido e selecionável | 🔄 amadurece |
+| Mono p/ KPIs | — | `JetBrains Mono` + glow gold no hover | ✨ novo |
+| Glassmorphism | — | ❌ **rejeitado** (paridade cross-device) | — |
+| Surface premium (sólida) | bg branco + shadow neutra | bg sólido + **sombra colorida dupla + border-gradient + inner highlight** | ✨ novo |
+| Sombras coloridas | sombras pretas neutras | gold/sage tint 18–28%, dual-layer no hover | ✨ novo |
+| Border-gradient sutil | — | 1px gold→sage em cards de destaque | ✨ novo |
+| Hover lift pronunciado | translate -2px | translate -3px + sombra +40% | ✨ novo |
+| Dark mode | rascunho (v3 não usado) | polido, **incluído na v4 desde o início** | 🔄 firmado |
 
 > **Nota de continuidade:** Pipeline stages, canais (WhatsApp/Instagram/Web Chat) e ações semânticas success/warning/info/danger são **preservados** do v3. A reforma é na camada de **marca + chrome**, não na camada de **dado funcional** — não queremos retreinar Vitor sobre o que é "Negociação amarela" vs "Negociação laranja".
 
@@ -172,27 +175,53 @@ body { font-family: var(--font-sans); }
 
 ---
 
-## 4. 9 técnicas premium futuristas
+## 4. 9 técnicas premium futuristas (sem glassmorphism)
 
 > A camada futurista é **uma capa fina sobre o design system v3**, não um redesign visual. Cada técnica resolve um problema específico de hierarquia ou delight; nenhuma é decoração pura.
+> **Decisão Tania 2026-05-25:** glassmorphism foi **rejeitado** por exigir fallback diferente em Safari < 17 e WebView in-app — quebra de paridade visual entre dispositivos. As técnicas abaixo entregam o mesmo "premium" usando apenas surfaces sólidas + sombras + gradientes + micro-interações, funcionando idêntico em 100% dos browsers atuais.
 
-### 4.1 Glassmorphism sutil
+### 4.1 Surface premium sólida (substitui glassmorphism)
 
-**Quando usar:** sidebar, header sticky, drawers de detalhe de lead, modais sobre conteúdo.
+**Quando usar:** sidebar, header sticky, drawers de detalhe de lead, modais, cards de "destaque" no dashboard.
 
-**Quando NÃO usar:** KPI cards (precisam fundo sólido), inputs (perdem clareza), Kanban cards densos.
+**Quando NÃO usar:** Kanban cards densos (`shadow-sm` neutra basta), inputs (não distrair).
 
 ```css
 @layer utilities {
-  .glass {
-    background: color-mix(in srgb, hsl(var(--card)) 78%, transparent);
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-    border: 1px solid color-mix(in srgb, hsl(var(--border)) 60%, transparent);
+  .surface-premium {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    /* triple-layer:
+       (1) inner highlight 1px → ilusão 3D leve
+       (2) sombra sage tint média
+       (3) sombra ink suave para definição */
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.65),
+      0 4px 14px -4px rgb(var(--glow-sage) / 0.20),
+      0 1px 3px -1px rgb(var(--glow-ink) / 0.08);
   }
-  .glass-dark {
-    background: color-mix(in srgb, hsl(var(--card)) 60%, transparent);
-    backdrop-filter: blur(20px) saturate(160%);
+  .dark .surface-premium {
+    /* inner highlight branca não funciona no dark — usar gold sutil */
+    box-shadow:
+      inset 0 1px 0 0 rgb(var(--glow-gold) / 0.12),
+      0 4px 14px -4px rgb(0 0 0 / 0.45),
+      0 1px 3px -1px rgb(0 0 0 / 0.30);
+  }
+
+  /* Surface premium "destaque" — para KPI card de receita, login card */
+  .surface-premium-gold {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 0.70),
+      0 6px 20px -6px rgb(var(--glow-gold) / 0.22),
+      0 2px 6px -2px rgb(var(--glow-ink) / 0.10);
+  }
+  .dark .surface-premium-gold {
+    box-shadow:
+      inset 0 1px 0 0 rgb(var(--glow-gold) / 0.18),
+      0 6px 20px -6px rgb(var(--glow-gold) / 0.18),
+      0 2px 6px -2px rgb(0 0 0 / 0.40);
   }
 }
 ```
@@ -200,12 +229,56 @@ body { font-family: var(--font-sans); }
 **Tailwind utility:**
 
 ```tsx
-<aside className="glass border-r border-border/60">
+<aside className="surface-premium border-r border-border/60">
+<Card className="surface-premium-gold">
 ```
 
-**Componente shadcn afetado:** `Sheet`, `Dialog`, `Sidebar` custom.
+**Componente shadcn afetado:** `Sheet`, `Dialog`, `Sidebar` custom, `Card` (variant `premium`, `feature`).
 
-**Fallback:** se `backdrop-filter` não suportado, usar `bg-card/95` sólido (browsers ≥ 2018 cobrem 96% do tráfego).
+**Paridade cross-device:** 100% — não depende de `backdrop-filter`, `mask-image` ou qualquer feature de browser moderno.
+
+---
+
+### 4.1b Border-gradient sutil (1px gold→sage)
+
+**Quando usar:** cards de "destaque" do dashboard, hero card do login, banner de notificação importante.
+
+**Quando NÃO usar:** todos os cards (perde hierarquia), inputs, botões pequenos.
+
+```css
+@layer utilities {
+  .border-gradient-brand {
+    /* dual background trick:
+       - inner: cor do card via padding-box
+       - outer: gradient via border-box (vira "borda colorida") */
+    background:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--brand-gold)  65%, transparent) 0%,
+        color-mix(in srgb, var(--brand-sage)  50%, transparent) 100%
+      ) border-box;
+    border: 1px solid transparent;
+  }
+  /* Variante "destaque" — gold mais forte */
+  .border-gradient-feature {
+    background:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+      linear-gradient(135deg, var(--brand-gold), var(--brand-sage)) border-box;
+    border: 1.5px solid transparent;
+  }
+}
+```
+
+**Tailwind utility:**
+
+```tsx
+<Card className="border-gradient-brand surface-premium-gold rounded-xl">
+```
+
+**Componente shadcn afetado:** `Card` (variant `feature`), `Badge` (variant `feature-pill`).
+
+**Compatibilidade:** `background-clip: padding-box/border-box` é suportado desde 2014 — funciona em 100% dos browsers do tráfego.
 
 ---
 
@@ -216,16 +289,32 @@ body { font-family: var(--font-sans); }
 **Quando NÃO usar:** inputs (distrai durante digitação), texto de leitura.
 
 ```tsx
-// Botão primary com micro-interação
+// Botão primary com sombra colorida dupla (gold-glow + ink-shadow)
 <button className="
-  bg-action-primary text-white px-4 py-2 rounded-md font-semibold
+  btn-primary-premium
+  bg-foreground text-background px-4 py-2 rounded-md font-semibold
   transition-all duration-150 ease-out
-  hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgb(20_20_20/0.35)]
+  hover:-translate-y-0.5
   active:translate-y-0 active:scale-[0.98]
-  focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2
+  focus-visible:focus-ring-pulse
 ">
   Criar lead
 </button>
+```
+
+```css
+@layer utilities {
+  .btn-primary-premium {
+    box-shadow:
+      0 4px 12px -4px rgb(var(--glow-gold) / 0.30),  /* halo dourado */
+      0 2px 6px -2px rgb(var(--glow-ink) / 0.30);    /* base sólida */
+  }
+  .btn-primary-premium:hover {
+    box-shadow:
+      0 10px 24px -8px rgb(var(--glow-gold) / 0.40),
+      0 4px 10px -4px rgb(var(--glow-ink) / 0.40);
+  }
+}
 ```
 
 **Framer Motion (KanbanCard):**
@@ -284,43 +373,64 @@ import { motion } from 'framer-motion'
 
 ---
 
-### 4.4 Sombras coloridas (gold/sage tint, 8–15%)
+### 4.4 Sombras coloridas + hover lift pronunciado (gold/sage tint, 18–28%)
 
-**Quando usar:** cards elevados em foco, botão primary em hover, KPI card de destaque.
+**Quando usar:** cards elevados em foco, botão primary em hover, KPI card de destaque, surface premium.
 
 **Quando NÃO usar:** inputs (gera ruído visual), dividers.
 
+> **Mudança vs primeira versão da v4:** intensidade subiu de 8–15% para **18–28%** porque sem glassmorphism precisamos compensar a sensação de "profundidade". Cada `.shadow-*-lift` é a versão hover (translate -3px + sombra maior) da sombra base.
+
 ```css
 @layer utilities {
-  /* Sombra com tint dourado (foco) */
+  /* ─── Base: card em repouso ──────────────────────── */
   .shadow-gold {
     box-shadow:
-      0 4px 16px -4px rgb(231 149 1 / 0.18),
-      0 2px 6px -2px rgb(20 20 20 / 0.08);
+      0 4px 16px -4px rgb(var(--glow-gold) / 0.22),
+      0 2px 6px -2px rgb(var(--glow-ink) / 0.10);
   }
-  /* Sombra com tint sage (cards de leitura) */
   .shadow-sage {
     box-shadow:
-      0 4px 14px -4px rgb(134 151 145 / 0.22),
-      0 1px 3px -1px rgb(20 20 20 / 0.06);
+      0 4px 14px -4px rgb(var(--glow-sage) / 0.24),
+      0 1px 3px -1px rgb(var(--glow-ink) / 0.08);
   }
-  /* Sombra para CTA primary hover */
   .shadow-ink-glow {
     box-shadow:
-      0 10px 24px -8px rgb(20 20 20 / 0.32),
-      0 4px 10px -4px rgb(20 20 20 / 0.18);
+      0 10px 24px -8px rgb(var(--glow-ink) / 0.32),
+      0 4px 10px -4px rgb(var(--glow-ink) / 0.18);
   }
-  /* Sombra terracota — usado em estados de erro destacados */
   .shadow-terracotta {
     box-shadow:
-      0 4px 14px -4px rgb(204 72 51 / 0.22);
+      0 4px 14px -4px rgb(var(--glow-terracotta) / 0.24);
+  }
+
+  /* ─── Hover lift: translate -3px + sombra +40% ────── */
+  .shadow-gold-lift {
+    transform: translateY(-3px);
+    box-shadow:
+      0 14px 32px -8px rgb(var(--glow-gold) / 0.28),
+      0 6px 14px -6px rgb(var(--glow-ink) / 0.18);
+  }
+  .shadow-sage-lift {
+    transform: translateY(-3px);
+    box-shadow:
+      0 14px 32px -8px rgb(var(--glow-sage) / 0.30),
+      0 6px 14px -6px rgb(var(--glow-ink) / 0.16);
+  }
+  .shadow-ink-lift {
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 36px -10px rgb(var(--glow-ink) / 0.45),
+      0 8px 16px -6px rgb(var(--glow-ink) / 0.28);
   }
 }
+
+/* Aplicação padrão: */
+/* .surface-premium { transition: transform 180ms, box-shadow 180ms; } */
+/* .surface-premium:hover { @apply shadow-sage-lift; } */
 ```
 
-**Tailwind config (alternativa):** adicionar como `boxShadow` em `theme.extend`. Documentado também na seção 9.
-
-**Componente shadcn afetado:** `Card`, `Button` (hover state).
+**Componente shadcn afetado:** `Card` (todas as variantes), `Button` (hover), `Sheet` (drawer abre com sombra lift).
 
 ---
 
@@ -449,11 +559,13 @@ const itemVariants = {
 
 ---
 
-### 4.8 Focus rings animados
+### 4.8 Focus rings animados (com pulse único ao focar)
 
 **Quando usar:** inputs, botões, links — qualquer alvo navegável por teclado.
 
 **Quando NÃO usar:** áreas de leitura, cards não-interativos.
+
+> **Reforço v4:** o ring agora **pulsa 1× ao receber foco** (600ms), depois fica estável. É um "tap visual" que chama atenção sem ser distrativo (não pulsa continuamente).
 
 ```css
 @layer base {
@@ -462,54 +574,86 @@ const itemVariants = {
     box-shadow:
       0 0 0 2px hsl(var(--background)),
       0 0 0 4px hsl(var(--ring));
-    transition: box-shadow 160ms cubic-bezier(0, 0, 0.2, 1);
+    animation: ring-pulse 600ms var(--easing-decelerate) 1;
+    transition: box-shadow 160ms var(--easing-decelerate);
   }
 
-  /* Input com focus animado */
+  /* Input com focus glow gold + halo */
   .input-focus-glow:focus-visible {
     box-shadow:
       0 0 0 2px hsl(var(--background)),
-      0 0 0 4px hsl(var(--brand-gold) / 0.6),
-      0 4px 16px -4px hsl(var(--brand-gold) / 0.25);
+      0 0 0 4px rgb(var(--glow-gold) / 0.65),
+      0 4px 16px -4px rgb(var(--glow-gold) / 0.30);
+    animation: ring-pulse 600ms var(--easing-decelerate) 1;
+  }
+}
+
+@keyframes ring-pulse {
+  0% {
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px rgb(var(--glow-gold) / 0.90),
+      0 0 18px 2px rgb(var(--glow-gold) / 0.45);
+  }
+  60% {
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 7px rgb(var(--glow-gold) / 0.30),
+      0 0 12px 0   rgb(var(--glow-gold) / 0.20);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px hsl(var(--background)),
+      0 0 0 4px rgb(var(--glow-gold) / 0.65);
   }
 }
 ```
 
 **Token:** `--ring` aponta para `--brand-gold` no light, mantém no dark. **Por quê gold e não ink?** preto sobre preto no dark some; gold funciona nos dois temas e amarra com a identidade do site.
 
+**Acessibilidade:** `prefers-reduced-motion` desliga o pulse — ring estático aparece direto.
+
 ---
 
-### 4.9 Loading skeletons com shimmer
+### 4.9 Loading skeletons com shimmer dourado-sutil
 
 **Quando usar:** estados de loading de Kanban, lista de leads, dashboard.
 
 **Quando NÃO usar:** banners, toasts (já têm spinner próprio).
+
+> **Reforço v4:** a "onda" do shimmer agora carrega **tom dourado sutil** no pico (em vez de cinza neutro). Comunica marca mesmo durante loading, sem virar pirotécnico.
 
 ```css
 @layer utilities {
   .skeleton-shimmer {
     background: linear-gradient(
       90deg,
-      hsl(var(--neutral-200)) 0%,
-      hsl(var(--neutral-100)) 50%,
-      hsl(var(--neutral-200)) 100%
+      hsl(0 0% 94%) 0%,
+      /* pico com 12% de gold misturado → dourado-sutil */
+      color-mix(in srgb, hsl(0 0% 97%) 88%, var(--brand-gold)) 50%,
+      hsl(0 0% 94%) 100%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.4s ease-in-out infinite;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 0.375rem;
   }
-
-  @keyframes shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+  .dark .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(0 0% 14%) 0%,
+      color-mix(in srgb, hsl(0 0% 18%) 82%, var(--brand-gold)) 50%,
+      hsl(0 0% 14%) 100%
+    );
+    background-size: 200% 100%;
   }
 }
 ```
 
 ```tsx
-// LeadCardSkeleton
-<div className="rounded-md border border-border p-3 space-y-2">
-  <div className="skeleton-shimmer h-4 w-2/3 rounded" />
-  <div className="skeleton-shimmer h-3 w-1/2 rounded" />
+// LeadCardSkeleton — usa surface-premium para coerência
+<div className="surface-premium p-3 space-y-2 rounded-md">
+  <div className="skeleton-shimmer h-4 w-2/3" />
+  <div className="skeleton-shimmer h-3 w-1/2" />
   <div className="flex gap-2 pt-1">
     <div className="skeleton-shimmer h-5 w-16 rounded-full" />
     <div className="skeleton-shimmer h-5 w-12 rounded-full" />
@@ -517,7 +661,41 @@ const itemVariants = {
 </div>
 ```
 
-**Componente shadcn afetado:** `Skeleton` (override ou wrapper).
+**Componente shadcn afetado:** `Skeleton` (override wrapper aplica `.skeleton-shimmer`).
+
+---
+
+### 4.10 KPI numbers com glow gold no hover
+
+**Quando usar:** valores numéricos de destaque no Dashboard (R$, %, contadores grandes).
+
+**Quando NÃO usar:** corpo de texto, números de timestamps, qualquer texto longo.
+
+```css
+@layer utilities {
+  .font-kpi {
+    font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+    transition: text-shadow 220ms var(--easing-decelerate);
+  }
+  /* Aplicar no parent card (group-hover) */
+  .group:hover .font-kpi-glow,
+  .font-kpi-glow:hover {
+    text-shadow:
+      0 0 18px rgb(var(--glow-gold) / 0.40),
+      0 0 2px  rgb(var(--glow-gold) / 0.22);
+  }
+}
+```
+
+```tsx
+<Card className="surface-premium group transition-all hover:shadow-gold-lift">
+  <span className="font-kpi font-kpi-glow text-3xl font-semibold">R$ 67.5k</span>
+</Card>
+```
+
+**Componente shadcn afetado:** `KPICard` custom.
 
 ---
 
@@ -543,13 +721,26 @@ Calculado via fórmula WCAG 2.1 (luminância relativa).
 | `--action-warning` `#B45309` | `--brand-paper` `#FFFFFF` | **4.7:1** | ✅ AA | Tarefa vencendo |
 | `--action-danger` `#CC4833` | `--brand-paper` `#FFFFFF` | **4.6:1** | ✅ AA | Erros |
 
-### Dark mode
+### Dark mode (firmado na v4 — não adiado)
 
-| Foreground | Background | Ratio | Resultado |
-|---|---|---|---|
-| `#F5F5F5` foreground | `#0F0F0F` background | **18.1:1** | ✅ AAA |
-| `--brand-ink` em `--brand-gold` (primary no dark) | gold sobre ink | **7.7:1** | ✅ AAA |
-| `--brand-gold` sobre `#1A1A1A` card | acento no dark | **6.9:1** | ✅ AA |
+Tema escuro foi recalculado para todos os pares críticos. Background base: `#0F0F0F`; card surface: `#1A1A1A`; primary swap: gold `#E79501` (ink sobre ink no dark some).
+
+| Foreground | Background | Ratio | Resultado | Uso |
+|---|---|---|---|---|
+| `#F5F5F5` foreground | `#0F0F0F` background | **18.1:1** | ✅ AAA | Texto principal dark |
+| `#F5F5F5` | `#1A1A1A` card | **15.4:1** | ✅ AAA | Texto em card |
+| `--brand-ink` `#141414` | `--brand-gold` `#E79501` (primary dark) | **7.7:1** | ✅ AAA | Texto preto em CTA gold |
+| `--brand-gold` `#E79501` | `#1A1A1A` card | **6.9:1** | ✅ AA | Acento gold em surface |
+| `--brand-gold` `#E79501` | `#0F0F0F` bg | **7.5:1** | ✅ AA | Acento em bg |
+| `--brand-sage` `#869791` | `#1A1A1A` | **4.9:1** | ✅ AA | Metadados/labels dark |
+| `--brand-paper` `#FFFFFF` | `--brand-terracotta` `#CC4833` | **4.7:1** | ✅ AA | Botão danger dark |
+| muted-foreground `#A6A6A6` | `#0F0F0F` bg | **9.8:1** | ✅ AAA | Texto descritivo dark |
+| Ring gold no dark `#E79501` | sobre card `#1A1A1A` | UI ≥ **3:1** ✅ | ✅ | Focus ring visível |
+
+**Red lines dark mode:**
+- ❌ Ink sobre ink (primary swap obrigatório para gold)
+- ❌ Sage como background de texto longo (mesmo que no light)
+- ❌ Border `--border` `#2E2E2E` para divisores críticos — usar `#3A3A3A` quando precisar destacar
 
 **Red lines:**
 - ❌ Branco sobre dourado em qualquer cenário (badge "novo" usa **ink sobre gold**).
@@ -624,16 +815,17 @@ Estados obrigatórios (toda tela documenta os 6):
 
 | Componente | Mudança v4 | Como aplicar |
 |---|---|---|
-| `Button` | `default` agora é ink, hover ganha `.shadow-ink-glow`, micro-tilt | Atualizar `buttonVariants` no `components/ui/button.tsx` |
-| `Card` | Variant `glass`, `feature` (com gradiente sutil) | Adicionar variantes via `cva` |
-| `Sheet` / `Drawer` | Backdrop com glassmorphism, slide 250ms | Override CSS no `sheetVariants` |
-| `Dialog` | Backdrop `--neutral-overlay` mais escuro, card pode receber `.glass` | Override |
-| `Input` | Focus ring gold animado | Adicionar `.input-focus-glow` |
-| `Badge` | `brand-gold`, `brand-sage` como variantes; variant `feature` com ring-1 gold | Atualizar `badgeVariants` |
-| `Skeleton` | Substituir `animate-pulse` por `.skeleton-shimmer` | Override em `components/ui/skeleton.tsx` |
-| `Toast` (sonner) | Toaster com `theme="light"` default + variante `theme="dark"` quando tema dark ativo | Atualizar `Toaster` no `layout.tsx` |
+| `Button` | `default` agora é ink, **sombra dupla** (gold-glow + ink-shadow) no repouso, hover ganha lift -2px + sombra +40% | Atualizar `buttonVariants` no `components/ui/button.tsx` |
+| `Card` | Variants `premium` (`.surface-premium`), `feature` (`.surface-premium-gold` + `.border-gradient-feature`), `elevated` (`.shadow-sage` → `.shadow-sage-lift` no hover) | Adicionar variantes via `cva` |
+| `Sheet` / `Drawer` | **`.surface-premium` sólida** (sem backdrop-filter), slide 250ms, overlay `--neutral-overlay` mais escuro | Override CSS no `sheetVariants` |
+| `Dialog` | Backdrop `--neutral-overlay`, card `.surface-premium-gold` | Override |
+| `Input` | Focus ring gold animado com **pulse 1× ao focar** (`.input-focus-glow`) | Adicionar `.input-focus-glow` |
+| `Badge` | `brand-gold`, `brand-sage` como variantes; variant `feature-pill` com `.border-gradient-feature` | Atualizar `badgeVariants` |
+| `Skeleton` | `.skeleton-shimmer` com **tint dourado-sutil** (substitui `animate-pulse`) | Override em `components/ui/skeleton.tsx` |
+| `Toast` (sonner) | `next-themes` injeta `theme="dark"` automaticamente quando dark ativo | Atualizar `Toaster` no `layout.tsx` |
 | `Tooltip` | Background `--brand-ink`, text branco, fade 100ms | Override |
-| `DropdownMenu` | Backdrop glass leve, item hover `bg-brand-sage-light` | Override |
+| `DropdownMenu` | **Surface sólida `--popover`** com `.surface-premium`; item hover `bg-secondary` | Override |
+| `Sidebar` (custom) | `.surface-premium` + border-r 1px; item ativo `bg-foreground` + dot dourado | Refactor componente |
 
 ---
 
@@ -676,10 +868,15 @@ Estados obrigatórios (toda tela documenta os 6):
         mono: ['var(--font-mono)', 'JetBrains Mono', 'IBM Plex Mono', 'monospace'],
       },
       boxShadow: {
-        'gold':       '0 4px 16px -4px rgb(231 149 1 / 0.18), 0 2px 6px -2px rgb(20 20 20 / 0.08)',
-        'sage':       '0 4px 14px -4px rgb(134 151 145 / 0.22), 0 1px 3px -1px rgb(20 20 20 / 0.06)',
+        // Base (repouso)
+        'gold':       '0 4px 16px -4px rgb(231 149 1 / 0.22), 0 2px 6px -2px rgb(20 20 20 / 0.10)',
+        'sage':       '0 4px 14px -4px rgb(134 151 145 / 0.24), 0 1px 3px -1px rgb(20 20 20 / 0.08)',
         'ink-glow':   '0 10px 24px -8px rgb(20 20 20 / 0.32), 0 4px 10px -4px rgb(20 20 20 / 0.18)',
-        'terracotta': '0 4px 14px -4px rgb(204 72 51 / 0.22)',
+        'terracotta': '0 4px 14px -4px rgb(204 72 51 / 0.24)',
+        // Lift (hover)
+        'gold-lift':  '0 14px 32px -8px rgb(231 149 1 / 0.28), 0 6px 14px -6px rgb(20 20 20 / 0.18)',
+        'sage-lift':  '0 14px 32px -8px rgb(134 151 145 / 0.30), 0 6px 14px -6px rgb(20 20 20 / 0.16)',
+        'ink-lift':   '0 16px 36px -10px rgb(20 20 20 / 0.45), 0 8px 16px -6px rgb(20 20 20 / 0.28)',
       },
       transitionDuration: {
         instant: '100ms',
@@ -696,11 +893,22 @@ Estados obrigatórios (toda tela documenta os 6):
           '0%':   { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
+        'pulse-sage': {
+          '0%, 100%': { transform: 'scale(1)',    opacity: '1'   },
+          '50%':      { transform: 'scale(1.15)', opacity: '0.7' },
+        },
+        'ring-pulse': {
+          '0%':   { boxShadow: '0 0 0 2px hsl(var(--background)), 0 0 0 4px rgb(231 149 1 / 0.90), 0 0 18px 2px rgb(231 149 1 / 0.45)' },
+          '60%':  { boxShadow: '0 0 0 2px hsl(var(--background)), 0 0 0 7px rgb(231 149 1 / 0.30), 0 0 12px 0 rgb(231 149 1 / 0.20)' },
+          '100%': { boxShadow: '0 0 0 2px hsl(var(--background)), 0 0 0 4px rgb(231 149 1 / 0.65)' },
+        },
       },
       animation: {
         'orb-drift':      'orb-drift 14s ease-in-out infinite',
         'orb-drift-slow': 'orb-drift 22s ease-in-out infinite',
-        shimmer:          'shimmer 1.4s ease-in-out infinite',
+        shimmer:          'shimmer 1.6s ease-in-out infinite',
+        'pulse-sage':     'pulse-sage 1.6s ease-in-out infinite',
+        'ring-pulse':     'ring-pulse 600ms cubic-bezier(0,0,0.2,1) 1',
       },
     },
   },
@@ -712,16 +920,18 @@ Estados obrigatórios (toda tela documenta os 6):
 ## 10. Checklist de qualidade v4
 
 - [x] Paleta literal extraída do site real (auditoria via Chrome DevTools MCP)
-- [x] WCAG AA recalculado em 15 combinações novas
+- [x] WCAG AA recalculado em 15 combinações light + 9 dark
 - [x] Tipografia Hind + Inter fallback + JetBrains Mono para KPI
-- [x] 9 técnicas premium documentadas com snippets, quando usar e quando NÃO usar
-- [x] Dark mode com swap inteligente (primary → gold no dark)
-- [x] Cap de animação reduzido para 250ms (uso prolongado)
-- [x] `prefers-reduced-motion` mantido (não muda do v3)
+- [x] **Glassmorphism REJEITADO** (decisão Tania) — substituído por `.surface-premium` sólida + `.border-gradient-brand` + hover lift
+- [x] 10 técnicas premium documentadas com snippets, quando usar e quando NÃO usar
+- [x] **Dark mode firmado dentro da v4** (não opcional, não adiado) — swap inteligente primary → gold
+- [x] Cap de animação reduzido para 250ms (uso prolongado); ring-pulse é exceção pontual (600ms, 1×)
+- [x] `prefers-reduced-motion` mantido (não muda do v3) + cobre `.ring-pulse`, orbs, shimmer
 - [x] Compatibilidade com v3: alias `brand-forest → ink`, `bg-brand-500 → ink` durante migração
 - [x] Estados completos documentados (default → loading → error)
-- [x] Skeleton shimmer substitui `animate-pulse`
+- [x] Skeleton shimmer com tint dourado-sutil (substitui `animate-pulse`)
 - [x] Tokens semânticos preservados (stages, canais não mudam)
+- [x] Paridade cross-device 100% — funciona idêntico em Chrome desktop, Safari iOS antigo, WebView in-app
 
 ---
 

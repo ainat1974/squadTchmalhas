@@ -1,11 +1,11 @@
-# ADR-009: Redesign do CRM com Paleta Real Techmalhas + Camada Premium Futurista
+# ADR-009: Redesign do CRM com Paleta Real Techmalhas + Camada Premium (Sem Glassmorphism) + Dark Mode
 
-**Data:** 2026-05-25
-**Status:** Proposto
+**Data:** 2026-05-25 (rev. 1 — pós-decisão Tania sobre glass + dark mode)
+**Status:** Aprovado nas premissas, aguardando go/no-go da Tania para iniciar T1
 **Decisor:** Davi Designer (UX/UI do squad)
 **Aprovador:** Tania (Techmalhas, PO)
 **Auditoria base:** `brand-audit-techmalhas-site.md` (extração ao vivo via Chrome DevTools MCP)
-**Implementação:** Fábio Fullstack (estimativa 14–18h em branch `feat/design-system-v4`)
+**Implementação:** Fábio Fullstack (estimativa 14–17h, target **15h**, em branch `feat/design-system-v4`)
 **Validação:** Quésia QA (checklist em `migration-plan-v4.md`)
 
 ---
@@ -34,9 +34,15 @@ aprovou a substituição da paleta para alinhar com a marca de verdade.
 
 Adicionalmente, a Tania pediu que o redesign tenha **"aspecto digno da
 competência do time de IA"** — ou seja, uma camada premium futurista
-(glassmorphism, micro-interações, sombras coloridas, dark mode polido) que
+(micro-interações, sombras coloridas, dark mode polido) que
 posicione o CRM como ferramenta moderna, **sem cair em over-design** ou perder
 a identidade editorial do site.
+
+**Decisões adicionais da Tania (revisão 1 deste ADR, 2026-05-25):**
+
+1. ✅ Verde → Preto `#141414` (primary CTA) — aprovado.
+2. ❌ **Glassmorphism rejeitado.** A Tania **não tolera paridade visual diferente entre desktop e mobile/iOS antigo/WebView** — o fallback `@supports not(backdrop-filter)` da v4 original criaria duas experiências visuais para a mesma feature, o que é inaceitável. **Substituído por `.surface-premium` sólida + `.border-gradient-brand` + hover lift pronunciado**, que funciona idêntico em 100% dos browsers do tráfego.
+3. ✅ **Dark mode firmado dentro da v4** (não adiado para v4.1). Adiciona 1.5h ao plano de migração; matriz de contraste WCAG AA recalculada para todos os pares no tema escuro.
 
 ---
 
@@ -50,8 +56,9 @@ a identidade editorial do site.
 | F4 | Vitor usa CRM 6–8h/dia em campo | Camada futurista não pode cansar (cap 250ms em animações, glass com fallback) |
 | F5 | WCAG AA é não-negociável (compromisso registrado no v3) | Toda nova combinação precisa ≥ 4.5:1 para texto |
 | F6 | Tailwind 4 + shadcn/ui já configurados | Customizar via tokens HSL, não via override CSS direto |
-| F7 | Mobile-first (Vitor com celular em loja) | Glass deve degradar para sólido em browsers antigos; touch targets ≥ 44px |
-| F8 | Custos de implementação devem ser limitados | Estimativa precisa caber em 2 dias de trabalho do Fábio (16h target) |
+| F7 | Mobile-first (Vitor com celular em loja) | Paridade visual cross-device obrigatória; touch targets ≥ 44px; **glass rejeitado** porque depende de `backdrop-filter` (Safari < 17 e WebView in-app não suportam consistente) |
+| F8 | Custos de implementação devem ser limitados | Estimativa precisa caber em 2 dias de trabalho do Fábio (**15h target**) |
+| F10 | Tania não aceita inconsistência visual entre dispositivos | Forçou rejeição do glassmorphism (rev. 1 deste ADR) |
 | F9 | Quésia precisa conseguir validar visualmente | Checklist de QA precisa ser binário (visto/não visto), não subjetivo |
 
 ---
@@ -72,20 +79,22 @@ a identidade editorial do site.
 - ⚠️ **Risco:** baixo, mas Tania pediu explicitamente o tom premium.
 - ⏱️ **Tempo:** ~6h.
 
-### Opção C — Adotar paleta literal **+ camada futurista cirúrgica** (recomendado)
+### Opção C (rev. 1) — Paleta literal **+ camada futurista cirúrgica SEM glassmorphism + dark mode firmado** (recomendado)
 
 - ✅ **Prós:**
   - Marca real preservada (preto/branco/dourado/sage como tokens base).
-  - Camada futurista (glass, sombras coloridas, mesh, dark mode) **opt-in por componente** — Sidebar e Login ganham; KanbanCards permanecem opacos para legibilidade.
-  - WCAG AA preservado (matriz de contraste recalculada).
+  - Camada futurista cirúrgica via: `.surface-premium` sólida com inner highlight 3D, `.border-gradient-brand` (gold→sage), sombras coloridas duplas (gold-glow + ink-shadow), hover lift -3px, mesh gradient + 3 orbs no login, `ring-pulse` animado em focus, KPI glow gold no hover, skeleton shimmer com tint dourado, micro-interações ≤ 250ms.
+  - **Paridade visual cross-device 100%** — nenhuma técnica depende de `backdrop-filter`, `mask-image` ou feature de browser moderno.
+  - **Dark mode firmado** — não adiado, matriz WCAG AA validada nos dois temas.
+  - WCAG AA preservado (matriz de contraste recalculada light + dark).
   - Aliases de compatibilidade (`bg-brand-500 → ink`) garantem que código existente não quebra durante a migração.
-  - Estimativa 14–18h cabe em 2 dias do Fábio.
+  - Estimativa 14–17h cabe em 2 dias do Fábio.
 - ❌ **Contras:**
   - Mais surface de regressão (13 tarefas de migração).
-  - `backdrop-filter` tem custo em Safari < 17 (mitigado com `@supports` fallback).
   - Hind como nova font primary introduz risco mínimo de CLS (mitigado com `display: swap`).
-- ⚠️ **Risco:** **médio**. Mitigado por: branch separada, commits incrementais (10 commits sugeridos), QA da Quésia ao final, deploy só após aprovação Tania.
-- ⏱️ **Tempo:** **16h estimado** (faixa 14–18h).
+  - Dark mode pode ter FOUC inicial (mitigado via script inline do `next-themes`).
+- ⚠️ **Risco:** **médio-baixo** (risco do glass foi removido). Mitigado por: branch separada, commits incrementais (10 commits sugeridos), QA da Quésia ao final, deploy só após aprovação Tania.
+- ⏱️ **Tempo:** **15h target** (faixa 14–17h).
 
 ### Opção D — Redesign radical (system novo do zero, "design system 2.0")
 
@@ -102,7 +111,7 @@ a identidade editorial do site.
 
 ## Decisão
 
-**Adotar Opção C — paleta literal do site + camada futurista cirúrgica.**
+**Adotar Opção C (rev. 1) — paleta literal do site + camada futurista cirúrgica SEM glassmorphism + dark mode firmado.**
 
 ### Justificativa técnica
 
@@ -112,31 +121,41 @@ a identidade editorial do site.
    por uma razão: a marca Techmalhas é editorial, sóbria, com confiança ganha
    em 30 anos. CRM deve refletir isso.
 
-2. **Camada futurista é cirúrgica, não decorativa.** Cada uma das 9 técnicas
-   premium adotadas (glass, sombras coloridas, mesh, micro-interações, stagger,
-   dark mode, focus glow, shimmer, gradientes sutis) tem
-   **quando usar / quando NÃO usar** documentado. KanbanCards permanecem opacos
-   porque legibilidade densa importa mais que delight; Login e Sidebar ganham
-   glass porque são pontos de "respiro" do produto.
+2. **Camada futurista é cirúrgica E cross-device.** As 10 técnicas premium
+   adotadas (`.surface-premium`, `.border-gradient-brand`, sombras coloridas
+   duplas, hover lift, mesh + orbs, micro-interações, stagger elaborado,
+   focus ring com pulse 1×, skeleton shimmer dourado, KPI glow gold) **funcionam
+   idênticas em 100% dos browsers do tráfego**. Glassmorphism foi explicitamente
+   rejeitado pela Tania para garantir paridade visual entre desktop e iOS antigo /
+   WebView in-app — força de design (F10) sem trade-off.
 
-3. **Acessibilidade preservada e recalculada.** A matriz WCAG AA cobre 15
-   combinações novas; nenhuma regressão; alguns combos sobem para AAA
-   (ex.: ink sobre paper passa de 18.7:1).
+3. **Dark mode firmado não-opcional.** A Tania decidiu incluí-lo na v4 desde
+   o início. WCAG AA recalculado para 9 pares no dark; primary faz swap
+   inteligente para gold (ink sobre ink no dark some). Toggle opt-in com default
+   light (preferência `_memory/preferences.md`), mas tema dark está pronto e
+   navegável desde o primeiro deploy v4.
 
-4. **Retrocompatibilidade explícita.** Aliases no `tailwind.config.ts`
+4. **Acessibilidade preservada e recalculada.** A matriz WCAG AA cobre 15
+   combinações light + 9 dark; nenhuma regressão; alguns combos sobem para AAA
+   (ex.: ink sobre paper passa de 18.7:1; texto principal dark 18.1:1).
+
+5. **Retrocompatibilidade explícita.** Aliases no `tailwind.config.ts`
    garantem que `bg-brand-500` continua existindo — só muda **cor**. Fábio
    não precisa refatorar todos os call-sites; o sistema "vira de cor" com
    2 arquivos editados (T1 + T2).
 
-5. **Custo cabe no operating model.** 16h estimadas = 2 dias úteis do Fábio,
+6. **Custo cabe no operating model.** 15h estimadas = 2 dias úteis do Fábio,
    alinhado ao ADR-007 ("Implementação > 4h com escopo definido = Fábio").
+   Sem glass economiza ~1h (sem `@supports`, sem testar Safari); dark mode
+   firmado adiciona 1.5h.
 
 ### Não-decisões (escopo do v4)
 
 - ✋ **Não estamos** redesenhando a IA conversacional (Amanda) nem o domínio do CRM (pipeline stages, canais, regras de tarefa obrigatória) — só o chrome visual.
 - ✋ **Não estamos** trocando a stack de UI (Tailwind 4 + shadcn/ui permanece).
 - ✋ **Não estamos** removendo Inter — fica como fallback no `next/font` (custo zero).
-- ✋ **Não estamos** tornando dark mode obrigatório — fica opt-in com default light (ADR registrado em `_memory/preferences.md`).
+- ✋ **Não estamos** forçando dark mode como tema padrão — fica opt-in, default light. **Mas** o dark mode é parte da v4, não adiado.
+- ✋ **Não estamos** usando glassmorphism em nenhum lugar — `backdrop-filter` proibido no codebase v4.
 
 ---
 
@@ -145,20 +164,23 @@ a identidade editorial do site.
 ### Positivas
 
 - ✅ **Alinhamento de marca total** entre site Techmalhas e CRM. Tania ganha argumento de "produto coerente" ao mostrar para qualquer pessoa.
-- ✅ **Posicionamento premium** (glass, sombras coloridas, mesh) sem perder utilidade — sinaliza competência do time de IA.
-- ✅ **Dark mode polido** disponível para Vitor/Ana que trabalham à noite ou preferem.
-- ✅ **WCAG AAA em pontos críticos** (texto principal 18.7:1; CTA primary 18.7:1) — superior ao v3 em vários combos.
+- ✅ **Posicionamento premium cross-device** (surfaces sólidas com inner highlight + sombras coloridas duplas + border-gradient + mesh) — sinaliza competência do time de IA. **Mesma experiência visual em todos os dispositivos.**
+- ✅ **Dark mode polido e firmado** disponível para Vitor/Ana que trabalham à noite ou preferem.
+- ✅ **WCAG AAA em pontos críticos** light (texto principal 18.7:1; CTA primary 18.7:1) **e dark** (texto principal 18.1:1) — superior ao v3 em vários combos.
 - ✅ **Font Hind** importada via `next/font/google` (mesmo mecanismo que Inter, sem complexidade adicional).
-- ✅ **Skeletons shimmer** substituem `animate-pulse` (sensação de loading mais sofisticada).
+- ✅ **Skeletons shimmer com tint dourado-sutil** substituem `animate-pulse` (sensação de loading mais sofisticada, com marca presente até no loading).
 - ✅ **Compatibilidade preservada** — código existente não precisa ser tocado se não quisermos.
+- ✅ **Risco do `backdrop-filter` eliminado** — não há mais necessidade de testar/manter fallback Safari/WebView.
 
 ### Negativas / riscos aceitos
 
 - ⚠️ **Surface de regressão.** 13 tarefas de migração; bug pode entrar em qualquer ponto. **Mitigação:** branch separada + commits incrementais + checklist de QA da Quésia.
-- ⚠️ **`backdrop-filter` em Safari antigo.** Custo de performance. **Mitigação:** fallback `@supports not` com `bg-card/95` sólido.
 - ⚠️ **Hind tem métricas diferentes de Inter.** Risco mínimo de CLS no primeiro paint. **Mitigação:** `display: 'swap'`, fallback Inter no stack, Lighthouse CLS deve permanecer < 0.05.
+- ⚠️ **Dark mode FOUC** (flash de tema no primeiro paint). **Mitigação:** script inline do `next-themes` aplica classe antes da hidratação.
+- ⚠️ **Inner-highlight branca no dark** ficaria estranha se aplicada literal. **Mitigação:** já tratado no CSS (`.dark .surface-premium` troca por inner-highlight gold sutil 12%).
 - ⚠️ **Custo cognitivo da Tania durante demo.** Após deploy, a Tania vai abrir o CRM e ver tudo preto/dourado em vez de verde. **Mitigação:** demo guiada antes do merge; rollback em 1 commit se necessário.
-- ⚠️ **Cap de animação 250ms** (mais conservador que v3 que tinha 500ms). Decisão deliberada para uso prolongado, mas pode parecer "menos delight" em demos curtas.
+- ⚠️ **Cap de animação 250ms** (mais conservador que v3 que tinha 500ms). Decisão deliberada para uso prolongado. **Exceção:** `ring-pulse` 600ms 1× (não infinito, OK pelo princípio da rariedade).
+- ⚠️ **Dark mode dobra a surface de QA.** Quésia precisa validar ~60 pontos visuais em dois temas. **Mitigação:** checklist explícito no `migration-plan-v4.md` separa light/dark.
 
 ---
 
@@ -179,13 +201,16 @@ Após o deploy em produção, se um problema **operacional** for descoberto (Vit
 
 ---
 
-## Critérios de aceite (para Tania aprovar este ADR)
+## Critérios de aceite (todos resolvidos pela Tania em 2026-05-25)
 
-- [ ] **Tania confirma** que prefere preto/dourado/sage (paleta real) a verde floresta (v3).
-- [ ] **Tania confirma** que aceita o investimento de 14–18h do Fábio para a migração.
-- [ ] **Tania confirma** que dark mode pode ser opt-in (default light), sem priorizar adoção.
-- [ ] **Tania confirma** que a estética "futurista cirúrgica" (glass + mesh no login + sombras coloridas) é apropriada — vs alternativa mais sóbria (Opção B).
-- [ ] **Tania entende** que o redesign **não** muda a UX funcional (pipeline stages, canais, drag-drop continuam idênticos).
+- [x] **Tania confirmou** que prefere preto/dourado/sage (paleta real) a verde floresta (v3).
+- [x] **Tania confirmou** que aceita o investimento de 14–17h do Fábio para a migração (target 15h).
+- [x] **Tania confirmou** que dark mode entra na v4 desde o início (opt-in com default light).
+- [x] **Tania confirmou** que a estética "futurista cirúrgica" (mesh + orbs marcantes + surfaces premium + sombras coloridas duplas + dark mode) é apropriada — vs alternativa mais sóbria (Opção B).
+- [x] **Tania rejeitou** glassmorphism por exigir fallback diferente em Safari/WebView — prioriza paridade visual cross-device. Substituído por `.surface-premium` sólida.
+- [x] **Tania entende** que o redesign **não** muda a UX funcional (pipeline stages, canais, drag-drop continuam idênticos).
+
+**Status: nenhuma pergunta pendente.** Fábio liberado para iniciar T1 na branch `feat/design-system-v4`.
 
 ---
 
