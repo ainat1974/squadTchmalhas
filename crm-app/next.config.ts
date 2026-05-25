@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
     // TODO: remover após corrigir tipos restantes (webhooks, seed, validators)
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
+  turbopack: {
+    root: __dirname,
   },
 };
 
