@@ -1,9 +1,9 @@
 /**
- * proxy.ts — Proteção de rotas (Next.js 16, substitui middleware.ts)
- * Rotas públicas passam direto; demais exigem sessão Supabase.
+ * middleware.ts — Proteção de rotas (Next.js 16)
+ * Usar middleware.ts (não proxy.ts): Turbopack 16.2.x gera manifest vazio com proxy.ts → 404 na Vercel.
  */
 import { NextResponse, type NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/proxy'
+import { updateSession } from '@/lib/supabase/middleware'
 
 const PREVIEW_MODE =
   process.env.PREVIEW_MODE === 'true' ||
@@ -22,7 +22,7 @@ function isPublicPath(pathname: string): boolean {
   )
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (isPublicPath(pathname) || PREVIEW_MODE) {
@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest) {
 
     return response
   } catch (err) {
-    console.error('[proxy] auth check failed:', err)
+    console.error('[middleware] auth check failed:', err)
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     return NextResponse.redirect(loginUrl)

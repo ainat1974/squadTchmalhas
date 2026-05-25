@@ -1,5 +1,5 @@
 /**
- * Sessão Supabase no proxy (Next.js 16) — padrão oficial @supabase/ssr
+ * Sessão Supabase no middleware — padrão oficial @supabase/ssr
  * @see https://supabase.com/docs/guides/auth/server-side/nextjs
  */
 import { createServerClient } from '@supabase/ssr'
