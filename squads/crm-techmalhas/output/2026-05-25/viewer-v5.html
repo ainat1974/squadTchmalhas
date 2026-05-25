@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CRM Techmalhas — Viewer Design v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --canvas: #0A0B0D;
+    --card: #141414;
+    --elevated: #1C1D21;
+    --sunken: #0E0F12;
+    --ink: #141414;
+    --paper: #FFFFFF;
+    --gold: #E79501;
+    --gold-glow: rgba(231, 149, 1, 0.35);
+    --sage: #869791;
+    --teal-sage: #5BA89A;
+    --terracotta: #CC4833;
+    --text: #F3F4F6;
+    --text-muted: #9CA3AF;
+    --text-dim: #6B7280;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--canvas);
+    color: var(--text);
+    font-family: 'Hind', system-ui, sans-serif;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Header ─────────────────────────── */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(20, 20, 20, 0.92);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex; align-items: center; gap: 24px;
+    backdrop-filter: blur(8px);
+  }
+  .brand { display: flex; align-items: flex-start; flex-direction: column; line-height: 1; }
+  .brand .tm {
+    font-family: 'Hind', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: -0.04em;
+    text-shadow: 0 0 24px var(--gold-glow);
+  }
+  .brand .wordmark {
+    font-family: 'Hind', sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 0.14em;
+    text-transform: none;
+    margin-top: 2px;
+  }
+  header h1 {
+    font-size: 16px; font-weight: 600; color: var(--text);
+    margin-left: auto;
+  }
+  header .meta {
+    font-size: 12px; color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Tabs ───────────────────────────── */
+  nav.tabs {
+    display: flex; gap: 4px; padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    background: var(--sunken);
+  }
+  .tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 10px 18px;
+    font-family: 'Hind', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 150ms ease;
+  }
+  .tab:hover { color: var(--text); border-color: var(--gold); }
+  .tab.active {
+    background: rgba(231, 149, 1, 0.12);
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  .tab .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    margin-left: 8px;
+    color: var(--text-dim);
+  }
+
+  /* ── Main content ─────────────────────── */
+  main {
+    padding: 24px 32px 80px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .screen-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .screen-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .screen-frame {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    margin-bottom: 24px;
+  }
+  .screen-frame .toolbar {
+    background: var(--elevated);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #FF5F57; }
+  .dot.y { background: #FFBD2E; }
+  .dot.g { background: #28C840; }
+  .screen-frame .url {
+    margin-left: 16px; flex: 1;
+    padding: 4px 10px;
+    background: var(--canvas);
+    border-radius: 4px;
+    color: var(--text-muted);
+  }
+  .screen-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ── Comparison grid ─────────────────── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .compare-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .compare-card h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .compare-card.before h3 { color: var(--terracotta); }
+  .compare-card.after h3 { color: var(--gold); }
+  .compare-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Info card ───────────────────────── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .info-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+  .info-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .info-card .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .info-card .delta {
+    font-size: 13px;
+    color: var(--teal-sage);
+    margin-top: 4px;
+  }
+
+  /* ── Footer ───────────────────────────── */
+  footer {
+    padding: 24px 32px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: center;
+    background: var(--sunken);
+  }
+
+  /* ── Responsive ──────────────────────── */
+  @media (max-width: 900px) {
+    header { flex-wrap: wrap; padding: 12px 16px; }
+    nav.tabs { padding: 12px 16px; }
+    main { padding: 16px; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="tm">TM</span>
+    <span class="wordmark">CRM Techmalhas</span>
+  </div>
+  <h1>Design v5 — Visualizador de Mockups</h1>
+  <span class="meta">commit af39593 · 2026-05-25</span>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-target="login">Login <span class="badge">01</span></button>
+  <button class="tab" data-target="dashboard">Dashboard <span class="badge">02</span></button>
+  <button class="tab" data-target="pipeline">Pipeline <span class="badge">03</span></button>
+  <button class="tab" data-target="leads">Leads <span class="badge">04</span></button>
+  <button class="tab" data-target="chat">Chat <span class="badge">05</span></button>
+  <button class="tab" data-target="comparacao">Antes / Depois <span class="badge">+</span></button>
+  <button class="tab" data-target="referencia">Sua Referência <span class="badge">★</span></button>
+</nav>
+
+<main>
+
+<!-- LOGIN -->
+<section class="panel active" id="login">
+  <h2 class="screen-title">Tela de Login</h2>
+  <p class="screen-subtitle">Card escuro elevado · TM em ouro com glow · "CRM Techmalhas" abaixo · Botão Entrar gold sólido</p>
+  <div class="screen-frame">
+    <div class="toolbar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="url">https://squad-tchmalhas.vercel.app/login</span>
+    </div>
+    <img src="mockups-v5/mockup-v5-01-login-tm-crm-techmalhas.png" alt="Login v5" />
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section class="panel" id="dashboard">
+  <h2 class="screen-title">Dashboard Analítico</h2>
+  <p class="screen-subtitle">KPIs com sparkline · Gráfico de performance teal-sage · Recomendações · Vendas ganhas vs perdidas · Leads recentes · FAB gold</p>
+  <div class="screen-frame">
+    <div class="toolbar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="url">https://squad-tchmalhas.vercel.app/dashboard</span>
+    </div>
+    <img src="mockups-v5/mockup-v5-02-dashboard-tm-crm-techmalhas.png" alt="Dashboard v5" />
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="label">Receita mês (KPI 1)</div>
+      <div class="value">R$ 67.5k</div>
+      <div class="delta">↑ 34% vs mês anterior</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Pipeline ativo</div>
+      <div class="value">R$ 182k</div>
+      <div class="delta">↑ 8% vs mês anterior</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Conversão</div>
+      <div class="value">18.4%</div>
+      <div class="delta" style="color: var(--terracotta);">↓ 2% vs mês anterior</div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="panel" id="pipeline">
+  <h2 class="screen-title">Pipeline Kanban</h2>
+  <p class="screen-subtitle">6 colunas (Novo · Contato · Proposta · Negociação · Ganho · Perdido) · Cards dark elevated · Estrelas gold para leads quentes · FAB gold</p>
+  <div class="screen-frame">
+    <div class="toolbar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="url">https://squad-tchmalhas.vercel.app/pipeline</span>
+    </div>
+    <img src="mockups-v5/mockup-v5-03-pipeline-tm-crm-techmalhas.png" alt="Pipeline v5" />
+  </div>
+</section>
+
+<!-- LEADS -->
+<section class="panel" id="leads">
+  <h2 class="screen-title">Leads (Tabela)</h2>
+  <p class="screen-subtitle">Filtros pills · Tabela dark com chips de etapa coloridos · Indicadores de canal · Avatares com gradient · Tags de tarefa</p>
+  <div class="screen-frame">
+    <div class="toolbar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="url">https://squad-tchmalhas.vercel.app/leads</span>
+    </div>
+    <img src="mockups-v5/mockup-v5-04-leads-tm-crm-techmalhas.png" alt="Leads v5" />
+  </div>
+</section>
+
+<!-- CHAT -->
+<section class="panel" id="chat">
+  <h2 class="screen-title">Chat — Visão Operador (Amanda)</h2>
+  <p class="screen-subtitle">3 painéis · Lista de conversas em fila · Bolhas da operadora em gold com texto preto · Botão ENVIAR gold com sparkle</p>
+  <div class="screen-frame">
+    <div class="toolbar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="url">https://squad-tchmalhas.vercel.app/chat</span>
+    </div>
+    <img src="mockups-v5/mockup-v5-05-chat-tm-crm-techmalhas.png" alt="Chat v5" />
+  </div>
+</section>
+
+<!-- ANTES / DEPOIS -->
+<section class="panel" id="comparacao">
+  <h2 class="screen-title">Comparação: CRM Atual (light verde) vs Design v5 (dark gold)</h2>
+  <p class="screen-subtitle">À esquerda: como está hoje no Vercel. À direita: como ficará após implementação do Fábio (~21h).</p>
+
+  <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 24px 0 8px;">Login</h3>
+  <div class="compare-grid">
+    <div class="compare-card before">
+      <h3>Atual (deployed)</h3>
+      <img src="current-crm-login.png" alt="Login atual" />
+    </div>
+    <div class="compare-card after">
+      <h3>Proposto v5</h3>
+      <img src="mockups-v5/mockup-v5-01-login-tm-crm-techmalhas.png" alt="Login v5" />
+    </div>
+  </div>
+
+  <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 24px 0 8px;">Dashboard</h3>
+  <div class="compare-grid">
+    <div class="compare-card before">
+      <h3>Atual (deployed)</h3>
+      <img src="current-crm-dashboard.png" alt="Dashboard atual" />
+    </div>
+    <div class="compare-card after">
+      <h3>Proposto v5</h3>
+      <img src="mockups-v5/mockup-v5-02-dashboard-tm-crm-techmalhas.png" alt="Dashboard v5" />
+    </div>
+  </div>
+
+  <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 24px 0 8px;">Pipeline Kanban</h3>
+  <div class="compare-grid">
+    <div class="compare-card before">
+      <h3>Atual (deployed)</h3>
+      <img src="current-crm-kanban.png" alt="Kanban atual" />
+    </div>
+    <div class="compare-card after">
+      <h3>Proposto v5</h3>
+      <img src="mockups-v5/mockup-v5-03-pipeline-tm-crm-techmalhas.png" alt="Pipeline v5" />
+    </div>
+  </div>
+</section>
+
+<!-- REFERÊNCIA -->
+<section class="panel" id="referencia">
+  <h2 class="screen-title">Sua Referência vs Dashboard Adaptado</h2>
+  <p class="screen-subtitle">À esquerda: a imagem que você enviou (dashboard analítico dark). À direita: como o Davi adaptou para Techmalhas mantendo cores da marca.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3 style="color: var(--teal-sage);">Sua referência (trading dashboard)</h3>
+      <img src="references/referencia-tania-dashboard-analytics.png" alt="Referência" />
+    </div>
+    <div class="compare-card after">
+      <h3>Dashboard CRM v5 (adaptado)</h3>
+      <img src="mockups-v5/mockup-v5-02-dashboard-tm-crm-techmalhas.png" alt="Dashboard v5" />
+    </div>
+  </div>
+
+  <div class="info-grid" style="grid-template-columns: 1fr 1fr; margin-top: 32px;">
+    <div class="info-card">
+      <div class="label">O que copiamos da referência</div>
+      <div style="margin-top: 12px; line-height: 1.7; color: var(--text); font-size: 14px;">
+        ✓ Fundo dark layered<br>
+        ✓ KPIs com sparkline<br>
+        ✓ Gráfico de performance com linha brilhante<br>
+        ✓ Cards de recomendação 3-col<br>
+        ✓ Bar chart ganhos vs perdidos<br>
+        ✓ Tabela limpa no rodapé<br>
+        ✓ FAB flutuante (mudou cor: roxo → gold)
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="label">O que adaptamos para Techmalhas</div>
+      <div style="margin-top: 12px; line-height: 1.7; color: var(--text); font-size: 14px;">
+        ✓ Roxo do FAB → Gold #E79501 (marca)<br>
+        ✓ Teal puro → Teal-sage #5BA89A (DNA marca)<br>
+        ✓ Vocabulário trading → vendas (Receita, Leads, Atacado)<br>
+        ✓ Tags #FOMO → canais (WhatsApp, IG, Web Chat)<br>
+        ✓ TM gold + CRM Techmalhas na sidebar<br>
+        ✓ Sem glassmorphism (sua decisão)<br>
+        ✓ Fonte Hind (mesma do site público)
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="brand" style="display: inline-flex; align-items: center; flex-direction: row; gap: 8px; vertical-align: middle; line-height: 1;">
+    <span class="tm" style="font-size: 18px;">TM</span>
+    <span class="wordmark" style="font-size: 10px;">CRM Techmalhas</span>
+  </div>
+  &nbsp;&nbsp;·&nbsp;&nbsp; Design System v5 (dark, premium) &nbsp;·&nbsp; Davi Designer &nbsp;·&nbsp;
+  <a href="https://github.com/ainat1974/squadTchmalhas/tree/main/squads/crm-techmalhas/output/2026-05-25" target="_blank">Documentação no GitHub</a>
+</footer>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    const target = t.dataset.target;
+    tabs.forEach(x => x.classList.toggle('active', x === t));
+    panels.forEach(p => p.classList.toggle('active', p.id === target));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+</script>
+
+</body>
+</html>
