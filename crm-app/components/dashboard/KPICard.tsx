@@ -1,5 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { cn }                from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 interface Props {
@@ -7,36 +6,47 @@ interface Props {
   value:  string
   icon:   string
   trend?: 'up' | 'down' | 'neutral'
+  accent?: 'gold' | 'sage' | 'positive' | 'negative'
 }
 
 const trendConfig = {
-  up:      { icon: TrendingUp,   color: 'text-green-600',   bg: 'bg-green-50'   },
-  down:    { icon: TrendingDown, color: 'text-red-600',     bg: 'bg-red-50'     },
-  neutral: { icon: Minus,        color: 'text-muted-foreground', bg: 'bg-muted' },
+  up:      { icon: TrendingUp,   color: 'text-metric-positive' },
+  down:    { icon: TrendingDown, color: 'text-metric-negative' },
+  neutral: { icon: Minus,        color: 'text-fg-muted' },
 }
 
-export function KPICard({ title, value, icon, trend }: Props) {
+const accentIconBg: Record<NonNullable<Props['accent']>, string> = {
+  gold:     'bg-brand-gold/15 text-brand-gold',
+  sage:     'bg-chart-primary/15 text-chart-primary',
+  positive: 'bg-metric-positive-soft text-metric-positive',
+  negative: 'bg-metric-negative-soft text-metric-negative',
+}
+
+export function KPICard({ title, value, icon, trend, accent = 'gold' }: Props) {
   const cfg = trend ? trendConfig[trend] : null
   const TrendIcon = cfg?.icon
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold tabular-nums">{value}</p>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="text-2xl" role="img" aria-hidden>{icon}</span>
-            {TrendIcon && (
-              <div className={cn('flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs font-medium', cfg.bg, cfg.color)}>
-                <TrendIcon className="h-3 w-3" />
-              </div>
-            )}
-          </div>
+    <div className="card-interactive group p-5">
+      <div className="mb-3 flex items-start justify-between">
+        <div
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-lg text-lg',
+            accentIconBg[accent],
+          )}
+          role="img"
+          aria-hidden
+        >
+          {icon}
         </div>
-      </CardContent>
-    </Card>
+        {TrendIcon && cfg && (
+          <div className={cn('font-kpi flex items-center gap-0.5 text-xs font-medium', cfg.color)}>
+            <TrendIcon className="h-3 w-3" />
+          </div>
+        )}
+      </div>
+      <p className="font-kpi font-kpi-glow text-2xl font-semibold text-fg-primary">{value}</p>
+      <p className="mt-1 text-[11px] uppercase tracking-wider text-fg-muted">{title}</p>
+    </div>
   )
 }

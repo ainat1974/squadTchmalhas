@@ -117,7 +117,7 @@ export function KanbanBoard({ pipeline, currentUser }: Props) {
   return (
     <>
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="kanban-scroll flex h-full gap-4 overflow-x-auto pb-4">
+        <div className="kanban-scroll flex h-full min-h-0 gap-4 overflow-x-auto pb-2">
           {stages.map(stage => (
             <KanbanColumn
               key={stage.id}

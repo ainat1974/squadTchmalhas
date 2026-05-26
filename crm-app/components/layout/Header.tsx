@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import type { User } from '@prisma/client'
-import { Bell } from 'lucide-react'
+import { Bell, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -13,6 +13,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/tasks': 'Tarefas',
   '/settings': 'Configurações',
   '/settings/pipelines': 'Configurações',
+  '/settings/users': 'Configurações',
 }
 
 function getPageTitle(pathname: string): string {
@@ -40,19 +41,32 @@ export function Header({ user }: Props) {
   const firstName = user.fullName.split(' ')[0]
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b bg-card px-6">
+    <header className="filter-bar-sticky flex h-16 shrink-0 items-center justify-between px-6">
       <div>
-        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[10px] uppercase tracking-widest text-fg-muted">
           {greeting}, {firstName}
         </p>
+        <h1 className="text-lg font-semibold tracking-tight text-fg-primary">{title}</h1>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        <div className="relative hidden sm:block">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted" />
+          <input
+            type="search"
+            placeholder="Buscar…"
+            className="bg-sunken input-focus-glow h-9 w-56 rounded-md border border-sutil pl-9 pr-3 text-sm text-fg-primary placeholder:text-fg-muted"
+            aria-label="Buscar no CRM"
+          />
+        </div>
+        <span className="hidden items-center gap-1.5 text-xs text-fg-muted md:flex">
+          <span className="pulse-live" aria-hidden />
+          ao vivo
+        </span>
         <Button
           variant="ghost"
           size="icon"
-          className="text-muted-foreground"
+          className="text-fg-muted hover:text-brand-gold"
           aria-label="Notificações"
           title="Notificações (em breve)"
         >

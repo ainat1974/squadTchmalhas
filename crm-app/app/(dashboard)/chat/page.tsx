@@ -59,7 +59,7 @@ export default async function ChatPage({ searchParams }: Props) {
   )
 
   return (
-    <div className="-m-6 flex h-[calc(100vh-4rem)] flex-col p-6">
+    <div className="flex h-full min-h-0 flex-col p-4">
       <ChatInbox sessions={sessions} initialSessionId={sessionId ?? null} />
     </div>
   )

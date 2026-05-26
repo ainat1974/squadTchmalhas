@@ -1,5 +1,4 @@
-import Link  from 'next/link'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { getInitials, formatRelative } from '@/lib/utils'
 import { Building2, Phone, Mail } from 'lucide-react'
@@ -22,50 +21,57 @@ export function LeadCard({ contact }: { contact: Contact }) {
   return (
     <Link
       href={`/leads/${contact.id}`}
-      className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-secondary/50"
+      className="card-interactive flex items-center gap-4 p-4"
     >
-      <Avatar className="h-10 w-10 shrink-0">
-        <AvatarFallback className="bg-brand-100 text-brand-700 text-sm font-semibold">
-          {getInitials(contact.fullName)}
-        </AvatarFallback>
-      </Avatar>
+      <span className="brand-tm-avatar shrink-0" style={{ width: 40, height: 40, fontSize: 13 }}>
+        {getInitials(contact.fullName)}
+      </span>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="font-medium truncate">{contact.fullName}</span>
-          <Badge variant={contact.isB2b ? 'default' : 'secondary'} className="shrink-0 text-[10px]">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="truncate font-medium text-fg-primary">{contact.fullName}</span>
+          <span className={contact.isB2b ? 'tag-pill-warm' : 'tag-pill'}>
             {contact.isB2b ? 'B2B' : 'B2C'}
-          </Badge>
+          </span>
           {contact.deals.length > 0 && (
-            <Badge variant="outline" className="shrink-0 text-[10px] text-brand-600 border-brand-300">
+            <Badge
+              variant="outline"
+              className="shrink-0 border-gold-soft bg-brand-gold/10 text-[10px] text-brand-gold"
+            >
               {contact.deals.length} deal{contact.deals.length > 1 ? 's' : ''}
             </Badge>
           )}
         </div>
 
-        <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-fg-muted">
           {contact.companyName && (
             <span className="flex items-center gap-1">
-              <Building2 className="h-3 w-3" />{contact.companyName}
+              <Building2 className="h-3 w-3" />
+              {contact.companyName}
             </span>
           )}
           {contact.phone && (
-            <span className="flex items-center gap-1">
-              <Phone className="h-3 w-3" />{contact.phone}
+            <span className="flex items-center gap-1 font-kpi">
+              <Phone className="h-3 w-3" />
+              {contact.phone}
             </span>
           )}
           {contact.email && (
-            <span className="flex items-center gap-1 truncate max-w-[180px]">
-              <Mail className="h-3 w-3" />{contact.email}
+            <span className="flex max-w-[200px] items-center gap-1 truncate">
+              <Mail className="h-3 w-3 shrink-0" />
+              {contact.email}
             </span>
           )}
         </div>
       </div>
 
       <div className="shrink-0 text-right">
-        <p className="text-xs text-muted-foreground">{formatRelative(contact.createdAt)}</p>
+        <p className="font-kpi text-xs text-fg-muted">{formatRelative(contact.createdAt)}</p>
         {contact.leadSource && (
-          <p className="mt-0.5 text-xs text-muted-foreground">{contact.leadSource.name}</p>
+          <p className="mt-0.5 text-xs text-fg-secondary">{contact.leadSource.name}</p>
+        )}
+        {contact.owner && (
+          <p className="mt-0.5 text-[10px] text-fg-muted">{contact.owner.fullName}</p>
         )}
       </div>
     </Link>

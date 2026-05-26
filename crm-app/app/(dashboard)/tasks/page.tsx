@@ -2,10 +2,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { formatDate, cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { AlertTriangle, CheckSquare, Clock } from 'lucide-react'
+import { formatDate, formatRelative, cn } from '@/lib/utils'
+import { AlertTriangle, CheckSquare, Clock, KanbanSquare } from 'lucide-react'
 
 export default async function TasksPage() {
   const user = await getCurrentUser()
@@ -30,21 +28,29 @@ export default async function TasksPage() {
 
   const pending = activities.filter((a) => !a.isDone)
   const done = activities.filter((a) => a.isDone)
+  const overdueCount = pending.filter((a) => a.dueDate && a.dueDate < now).length
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Tarefas & Atividades</h1>
-        <p className="text-sm text-muted-foreground">
-          {pending.length} pendentes · {done.length} concluídas
+    <div className="overflow-y-auto p-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <p className="text-sm text-fg-muted">
+          <strong className="font-kpi text-fg-primary">{pending.length}</strong> pendentes
+          {' · '}
+          <strong className="font-kpi text-fg-primary">{done.length}</strong> concluídas
+          {overdueCount > 0 && (
+            <>
+              {' · '}
+              <strong className="font-kpi text-metric-negative">{overdueCount}</strong> atrasadas
+            </>
+          )}
         </p>
       </div>
 
       {pending.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-          <CheckSquare className="mb-3 h-12 w-12 text-muted-foreground/40" />
-          <p className="font-medium text-muted-foreground">Nenhuma tarefa pendente</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="card-default flex flex-col items-center gap-3 py-16 text-center">
+          <CheckSquare className="h-12 w-12 text-fg-muted/40" />
+          <p className="font-medium text-fg-primary">Nenhuma tarefa pendente</p>
+          <p className="max-w-sm text-sm text-fg-muted">
             Tarefas obrigatórias do pipeline aparecem aqui quando criadas nos deals.
           </p>
         </div>
@@ -56,32 +62,30 @@ export default async function TasksPage() {
               <div
                 key={activity.id}
                 className={cn(
-                  'flex items-start gap-4 rounded-lg border bg-card p-4',
-                  overdue && 'border-amber-300 bg-amber-50/50',
+                  'card-interactive flex items-start gap-4 p-4',
+                  overdue && 'border-metric-negative/40',
                 )}
               >
-                <div className="mt-0.5">
+                <div className="mt-0.5 shrink-0">
                   {overdue ? (
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                    <AlertTriangle className="h-5 w-5 text-metric-negative" />
                   ) : (
-                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    <Clock className="h-5 w-5 text-brand-gold" />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{activity.title}</span>
+                    <span className="font-medium text-fg-primary">{activity.title}</span>
                     {activity.isMandatory && (
-                      <Badge variant="destructive" className="text-[10px]">
+                      <span className="rounded bg-metric-negative-soft px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-metric-negative">
                         Obrigatória
-                      </Badge>
+                      </span>
                     )}
                     {overdue && (
-                      <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-[10px]">
-                        Atrasada
-                      </Badge>
+                      <span className="tag-pill-warm font-kpi text-[10px]">Atrasada</span>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-1 text-sm text-fg-muted">
                     {activity.contact?.fullName && (
                       <span>Contato: {activity.contact.fullName}</span>
                     )}
@@ -96,15 +100,25 @@ export default async function TasksPage() {
                     )}
                   </p>
                   {activity.dueDate && (
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="font-kpi mt-1 text-xs text-fg-muted">
                       Prazo: {formatDate(activity.dueDate)}
+                      {overdue && (
+                        <span className="text-metric-negative">
+                          {' '}
+                          · {formatRelative(activity.dueDate)}
+                        </span>
+                      )}
                     </p>
                   )}
                 </div>
                 {activity.dealId && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/pipeline`}>Ver deal</Link>
-                  </Button>
+                  <Link
+                    href="/pipeline"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-sutil bg-elevated px-3 py-1.5 text-sm text-fg-secondary transition-colors hover:border-gold-soft hover:text-brand-gold"
+                  >
+                    <KanbanSquare className="h-4 w-4" />
+                    Ver deal
+                  </Link>
                 )}
               </div>
             )
@@ -113,14 +127,19 @@ export default async function TasksPage() {
       )}
 
       {done.length > 0 && (
-        <div>
-          <h2 className="mb-3 text-lg font-semibold text-muted-foreground">Concluídas recentemente</h2>
-          <div className="space-y-2 opacity-70">
+        <div className="mt-8">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">
+            Concluídas recentemente
+          </h2>
+          <div className="space-y-2 opacity-80">
             {done.slice(0, 10).map((activity) => (
-              <div key={activity.id} className="rounded-lg border bg-card p-3 text-sm">
-                <span className="line-through">{activity.title}</span>
+              <div
+                key={activity.id}
+                className="bg-sunken rounded-lg border border-sutil p-3 text-sm"
+              >
+                <span className="text-fg-muted line-through">{activity.title}</span>
                 {activity.doneAt && (
-                  <span className="ml-2 text-xs text-muted-foreground">
+                  <span className="font-kpi ml-2 text-xs text-fg-muted">
                     — {formatDate(activity.doneAt)}
                   </span>
                 )}

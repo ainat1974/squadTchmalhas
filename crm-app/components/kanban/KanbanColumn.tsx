@@ -1,9 +1,9 @@
 'use client'
-import { useDroppable }  from '@dnd-kit/core'
+import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { cn }            from '@/lib/utils'
-import { KanbanCard }    from './KanbanCard'
-import { Badge }         from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import { KanbanCard } from './KanbanCard'
+import { getStageChipClass } from '@/lib/stage-utils'
 
 interface Deal {
   id:         string
@@ -31,46 +31,31 @@ interface Props {
 
 export function KanbanColumn({ stage, currentUserId }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.id })
-  const dealIds = stage.deals.map(d => d.id)
+  const dealIds = stage.deals.map((d) => d.id)
+  const chip = getStageChipClass(stage.name)
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        'flex w-72 shrink-0 flex-col rounded-xl border bg-muted/40 transition-colors',
-        isOver && 'bg-secondary border-brand-300',
+        'flex w-72 shrink-0 flex-col',
+        isOver && 'rounded-lg ring-1 ring-brand-gold/40',
       )}
     >
-      {/* Header da coluna */}
-      <div className="flex items-center justify-between px-3 py-3">
-        <div className="flex items-center gap-2">
-          <div
-            className="h-3 w-3 rounded-full"
-            style={{ backgroundColor: stage.color }}
-            aria-hidden
-          />
-          <span className="text-sm font-medium">{stage.name}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">{stage.probability}%</span>
-          <Badge variant="secondary" className="text-xs tabular-nums">
-            {stage.deals.length}
-          </Badge>
-        </div>
+      <div className="bg-card mb-2 flex items-center justify-between rounded-lg border border-sutil px-3 py-2.5">
+        <span className={['rounded-full px-2 py-0.5 text-xs font-medium', chip].join(' ')}>
+          {stage.name}
+        </span>
+        <span className="font-kpi text-xs text-fg-muted">{stage.deals.length}</span>
       </div>
 
-      {/* Cards */}
-      <div className="flex-1 space-y-2 overflow-y-auto px-2 pb-2">
+      <div className="bg-sunken kanban-scroll flex-1 space-y-2 overflow-y-auto rounded-lg border border-sutil p-2">
         <SortableContext items={dealIds} strategy={verticalListSortingStrategy}>
-          {stage.deals.map(deal => (
-            <KanbanCard
-              key={deal.id}
-              deal={deal}
-              currentUserId={currentUserId}
-            />
+          {stage.deals.map((deal) => (
+            <KanbanCard key={deal.id} deal={deal} currentUserId={currentUserId} />
           ))}
           {stage.deals.length === 0 && (
-            <div className="flex h-16 items-center justify-center rounded-lg border border-dashed text-xs text-muted-foreground">
+            <div className="flex h-16 items-center justify-center rounded-lg border border-dashed border-sutil text-xs text-fg-muted">
               Arraste um card aqui
             </div>
           )}

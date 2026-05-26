@@ -1,11 +1,8 @@
 'use client'
-import { useSortable }  from '@dnd-kit/sortable'
-import { CSS }          from '@dnd-kit/utilities'
-import Link             from 'next/link'
-import { cn, formatCurrency } from '@/lib/utils'
-import { Badge }        from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { getInitials }  from '@/lib/utils'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import Link from 'next/link'
+import { cn, formatCurrency, getInitials } from '@/lib/utils'
 import { AlertTriangle } from 'lucide-react'
 
 interface Deal {
@@ -30,9 +27,9 @@ export function KanbanCard({ deal, isDragging = false }: Props) {
   } = useSortable({ id: deal.id })
 
   const style = {
-    transform:  CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString(transform),
     transition,
-    opacity:    isBeingDragged ? 0.3 : 1,
+    opacity:   isBeingDragged ? 0.35 : 1,
   }
 
   const hasMandatoryPending = deal.activities.length > 0
@@ -44,53 +41,49 @@ export function KanbanCard({ deal, isDragging = false }: Props) {
       {...attributes}
       {...listeners}
       className={cn(
-        'group cursor-grab rounded-lg border bg-card p-3 shadow-sm',
-        'active:cursor-grabbing hover:shadow-md transition-shadow',
-        isDragging && 'shadow-xl ring-2 ring-brand-500 rotate-2',
-        hasMandatoryPending && 'border-amber-400',
+        'card-interactive group cursor-grab p-3 active:cursor-grabbing',
+        isDragging && 'shadow-gold rotate-1 ring-1 ring-brand-gold/50',
+        hasMandatoryPending && 'border-metric-negative/40',
       )}
     >
-      {/* Alerta tarefas obrigatórias */}
       {hasMandatoryPending && (
-        <div className="mb-2 flex items-center gap-1.5 text-amber-600">
+        <div className="mb-2 flex items-center gap-1.5 text-metric-negative">
           <AlertTriangle className="h-3.5 w-3.5" />
           <span className="text-xs font-medium">
-            {deal.activities.length} tarefa{deal.activities.length > 1 ? 's' : ''} obrigatória{deal.activities.length > 1 ? 's' : ''}
+            {deal.activities.length} obrigatória{deal.activities.length > 1 ? 's' : ''}
           </span>
         </div>
       )}
 
-      {/* Título do deal */}
       <Link
         href={`/leads/${deal.contact.id}`}
-        className="line-clamp-2 text-sm font-medium hover:text-brand-500"
-        onClick={e => e.stopPropagation()}
+        className="line-clamp-2 text-sm font-medium text-fg-primary hover:text-brand-gold"
+        onClick={(e) => e.stopPropagation()}
       >
         {deal.title}
       </Link>
 
-      {/* Empresa */}
       {deal.contact.companyName && (
-        <p className="mt-0.5 truncate text-xs text-muted-foreground">{deal.contact.companyName}</p>
+        <p className="mt-0.5 truncate text-xs text-fg-muted">{deal.contact.companyName}</p>
       )}
 
-      {/* Footer: valor + avatar */}
       <div className="mt-3 flex items-center justify-between">
         {deal.value != null ? (
-          <span className="text-sm font-semibold text-brand-500">
+          <span className="font-kpi text-sm font-semibold text-brand-gold">
             {formatCurrency(deal.value)}
           </span>
         ) : (
-          <span className="text-xs text-muted-foreground">Sem valor</span>
+          <span className="text-xs text-fg-muted">Sem valor</span>
         )}
 
         {deal.owner && (
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={undefined} />
-            <AvatarFallback className="bg-brand-100 text-brand-700 text-[10px]">
-              {getInitials(deal.owner.fullName)}
-            </AvatarFallback>
-          </Avatar>
+          <span
+            className="brand-tm-avatar"
+            style={{ width: 24, height: 24, fontSize: 10 }}
+            title={deal.owner.fullName}
+          >
+            {getInitials(deal.owner.fullName)}
+          </span>
         )}
       </div>
     </div>
