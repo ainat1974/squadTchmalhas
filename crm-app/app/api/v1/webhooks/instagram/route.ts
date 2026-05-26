@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { findOrCreateContactByInstagram } from '@/lib/contacts-upsert'
 import {
   IG_ENABLED,
   verifyInstagramWebhook,
@@ -45,29 +46,13 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.instagramMessage.findUnique({ where: { metaMessageId: dm.mid } })
     if (existing) continue
 
-    const contact = await prisma.contact.upsert({
-      where:  { instagramId: dm.from.id } as { instagramId: string },
-      create: {
-        fullName:          dm.from.username ? `@${dm.from.username}` : `Instagram ${dm.from.id.slice(-6)}`,
-        instagramId:       dm.from.id,
-        instagramUsername: dm.from.username,
-        isB2b:             false,
-        lgpdConsent:       false,
-        tags:              ['instagram', 'dm'],
-      },
-      update: { instagramUsername: dm.from.username },
-    }).catch(() => prisma.contact.create({
-      data: {
-        fullName:          dm.from.username ? `@${dm.from.username}` : `Instagram ${dm.from.id.slice(-6)}`,
-        instagramId:       dm.from.id,
-        instagramUsername: dm.from.username,
-        isB2b:             false,
-        lgpdConsent:       false,
-        tags:              ['instagram', 'dm'],
-        phone:             undefined,
-        email:             undefined,
-      },
-    }))
+    const contact = await findOrCreateContactByInstagram(dm.from.id, {
+      fullName: dm.from.username
+        ? `@${dm.from.username}`
+        : `Instagram ${dm.from.id.slice(-6)}`,
+      instagramUsername: dm.from.username,
+      tags:              ['instagram', 'dm'],
+    })
 
     const igMsg = await prisma.instagramMessage.create({
       data: {
@@ -100,31 +85,13 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.instagramMessage.findUnique({ where: { metaMessageId: comment.id } })
     if (existing) continue
 
-    const contact = await prisma.contact.upsert({
-      where:  { instagramId: comment.from.id } as { instagramId: string },
-      create: {
-        fullName:          comment.from.username ? `@${comment.from.username}` : `IG ${comment.from.id.slice(-6)}`,
-        instagramId:       comment.from.id,
-        instagramUsername: comment.from.username,
-        isB2b:             false,
-        lgpdConsent:       false,
-        tags:              ['instagram', 'comentario', 'lead'],
-        phone:             undefined,
-        email:             undefined,
-      },
-      update: {},
-    }).catch(() => prisma.contact.create({
-      data: {
-        fullName:          comment.from.username ? `@${comment.from.username}` : `IG ${comment.from.id.slice(-6)}`,
-        instagramId:       comment.from.id,
-        instagramUsername: comment.from.username,
-        isB2b:             false,
-        lgpdConsent:       false,
-        tags:              ['instagram', 'comentario', 'lead'],
-        phone:             undefined,
-        email:             undefined,
-      },
-    }))
+    const contact = await findOrCreateContactByInstagram(comment.from.id, {
+      fullName: comment.from.username
+        ? `@${comment.from.username}`
+        : `IG ${comment.from.id.slice(-6)}`,
+      instagramUsername: comment.from.username,
+      tags:              ['instagram', 'comentario', 'lead'],
+    })
 
     await prisma.instagramMessage.create({
       data: {

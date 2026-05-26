@@ -191,7 +191,7 @@ model Contact {
   id              String        @id @default(uuid()) @db.Uuid
   fullName        String        @map("full_name") @db.Text
   email           String?       @db.Text
-  phone           String?       @db.Text
+  phone           String?       @unique @db.Text
   documentCpf     String?       @map("document_cpf") @db.Text
   documentCnpj    String?       @map("document_cnpj") @db.Text
   companyName     String?       @map("company_name") @db.Text
@@ -231,7 +231,6 @@ model Contact {
   webchatSessions   WebchatSession[]
 
   @@index([email])
-  @@index([phone])
   @@index([whatsappPhone], map: "idx_contacts_whatsapp")
   @@index([instagramId], map: "idx_contacts_instagram")
   @@index([assignedTo], map: "idx_contacts_assigned")
@@ -515,6 +514,7 @@ model InstagramMessage {
 // ============================================================
 model WebchatSession {
   id                String               @id @default(uuid()) @db.Uuid
+  sessionToken      String               @unique @default(uuid()) @map("session_token") @db.Uuid
   contactId         String?              @map("contact_id") @db.Uuid
   assignedTo        String?              @map("assigned_to") @db.Uuid
   status            WebchatSessionStatus @default(waiting)

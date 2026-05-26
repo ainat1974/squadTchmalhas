@@ -179,13 +179,28 @@ async function seedPipelines() {
     { name: 'Desistiu',           position: 4, color: '#ef4444', probability: 0,   isLostStage: true },
   ]
 
+  const createdStagesVarejo: Array<{ id: string; position: number }> = []
   for (const stage of stagesVarejo) {
-    await prisma.stage.upsert({
+    const created = await prisma.stage.upsert({
       where:  { pipelineId_position: { pipelineId: varejo.id, position: stage.position } },
       update: {},
       create: { ...stage, pipelineId: varejo.id },
     })
+    createdStagesVarejo.push(created)
   }
+
+  const stageCarrinhoVarejo = createdStagesVarejo.find((s) => s.position === 2)!
+  await prisma.stageRequiredTask.createMany({
+    skipDuplicates: true,
+    data: [
+      {
+        stageId:       stageCarrinhoVarejo.id,
+        title:         'Enviar link de pagamento',
+        activityType:  ActivityType.task,
+        dueDaysOffset: 1,
+      },
+    ],
+  })
 
   console.log('  ✅ 2 pipelines com stages criados (atacado: 6 stages, varejo: 5 stages)')
   return { atacadoId: atacado.id, varejoId: varejo.id, stagesAtacado: createdStagesAtacado }
@@ -298,8 +313,8 @@ async function seedDeals(
   const deals = [
     // Atacado
     {
-      title:      `Pedido inicial — ${b2bContacts[0].companyName}`,
-      contactId:  b2bContacts[0].id,
+      title:      `Pedido inicial — ${b2bContacts[0]!.companyName}`,
+      contactId:  b2bContacts[0]!.id,
       pipelineId: pipelineAtacado!.id,
       stageId:    stagesAtacado.find(s => s.position === 2)!.id, // Proposta Enviada
       assignedTo: SEED_IDS.users.vendedorAtacado,
@@ -308,8 +323,8 @@ async function seedDeals(
       currency:   'BRL',
     },
     {
-      title:      `Negociação coleção inverno — ${b2bContacts[1].companyName}`,
-      contactId:  b2bContacts[1].id,
+      title:      `Negociação coleção inverno — ${b2bContacts[1]!.companyName}`,
+      contactId:  b2bContacts[1]!.id,
       pipelineId: pipelineAtacado!.id,
       stageId:    stagesAtacado.find(s => s.position === 3)!.id, // Negociação
       assignedTo: SEED_IDS.users.vendedorAtacado,
@@ -318,8 +333,8 @@ async function seedDeals(
       currency:   'BRL',
     },
     {
-      title:      `Primeiro contato — ${b2bContacts[2].companyName}`,
-      contactId:  b2bContacts[2].id,
+      title:      `Primeiro contato — ${b2bContacts[2]!.companyName}`,
+      contactId:  b2bContacts[2]!.id,
       pipelineId: pipelineAtacado!.id,
       stageId:    stagesAtacado.find(s => s.position === 1)!.id, // Contato Realizado
       assignedTo: SEED_IDS.users.vendedorAtacado,
@@ -329,8 +344,8 @@ async function seedDeals(
     },
     // Varejo
     {
-      title:      `Compra vestido floral — ${b2cContacts[0].fullName}`,
-      contactId:  b2cContacts[0].id,
+      title:      `Compra vestido floral — ${b2cContacts[0]!.fullName}`,
+      contactId:  b2cContacts[0]!.id,
       pipelineId: pipelineVarejo!.id,
       stageId:    stagesVarejo.find(s => s.position === 2)!.id, // Carrinho / Orçado
       assignedTo: SEED_IDS.users.atendenteVarejo,
@@ -339,8 +354,8 @@ async function seedDeals(
       currency:   'BRL',
     },
     {
-      title:      `Atendimento WhatsApp — ${b2cContacts[2].fullName}`,
-      contactId:  b2cContacts[2].id,
+      title:      `Atendimento WhatsApp — ${b2cContacts[2]!.fullName}`,
+      contactId:  b2cContacts[2]!.id,
       pipelineId: pipelineVarejo!.id,
       stageId:    stagesVarejo.find(s => s.position === 1)!.id, // Atendimento Ativo
       assignedTo: SEED_IDS.users.atendenteVarejo,
@@ -361,8 +376,8 @@ async function seedDeals(
   // Criar atividades de follow-up para o primeiro deal
   await prisma.activity.create({
     data: {
-      dealId:     created[0].id,
-      contactId:  b2bContacts[0].id,
+      dealId:     created[0]!.id,
+      contactId:  b2bContacts[0]!.id,
       assignedTo: SEED_IDS.users.vendedorAtacado,
       createdBy:  SEED_IDS.users.vendedorAtacado,
       type:       ActivityType.call,

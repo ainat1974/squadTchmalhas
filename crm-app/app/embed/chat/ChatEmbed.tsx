@@ -23,9 +23,10 @@ const SESSION_STORAGE_KEY = 'tm_webchat_session'
 const SESSION_TTL_MS = 30 * 60 * 1000
 
 interface StoredSession {
-  sessionId:  string
-  createdAt:  number
-  visitorName?: string
+  sessionId:     string
+  sessionToken:  string
+  createdAt:     number
+  visitorName?:  string
 }
 
 function loadStoredSession(): StoredSession | null {
@@ -58,21 +59,30 @@ export function ChatEmbed({ initialSessionId, pageUrl }: Props) {
     if (initialSessionId) return initialSessionId
     return loadStoredSession()?.sessionId ?? null
   })
+  const [sessionToken, setSessionToken] = useState<string | null>(
+    () => loadStoredSession()?.sessionToken ?? null,
+  )
   const [visitorName, setVisitorName] = useState<string>(
     () => loadStoredSession()?.visitorName ?? '',
   )
 
-  if (!activeSessionId) {
+  if (!activeSessionId || !sessionToken) {
     return (
       <ChatRegistration
         pageUrl={pageUrl}
-        onSessionCreated={(sessionId, name) => {
+        onSessionCreated={(sessionId, token, name) => {
           setActiveSessionId(sessionId)
+          setSessionToken(token)
           setVisitorName(name)
           try {
             localStorage.setItem(
               SESSION_STORAGE_KEY,
-              JSON.stringify({ sessionId, createdAt: Date.now(), visitorName: name }),
+              JSON.stringify({
+                sessionId,
+                sessionToken: token,
+                createdAt: Date.now(),
+                visitorName: name,
+              }),
             )
           } catch {
             /* storage full or disabled */
@@ -82,7 +92,13 @@ export function ChatEmbed({ initialSessionId, pageUrl }: Props) {
     )
   }
 
-  return <ChatConversation sessionId={activeSessionId} visitorName={visitorName} />
+  return (
+    <ChatConversation
+      sessionId={activeSessionId}
+      sessionToken={sessionToken}
+      visitorName={visitorName}
+    />
+  )
 }
 
 function ChatRegistration({
@@ -90,7 +106,7 @@ function ChatRegistration({
   onSessionCreated,
 }: {
   pageUrl: string | null
-  onSessionCreated: (sessionId: string, name: string) => void
+  onSessionCreated: (sessionId: string, sessionToken: string, name: string) => void
 }) {
   const [form, setForm] = useState<FormState>({
     name:    '',
@@ -123,20 +139,26 @@ function ChatRegistration({
           visitorName:  form.name.trim() || undefined,
           visitorEmail: form.email.trim() || undefined,
           pageUrl:      pageUrl ?? undefined,
-          lgpdConsent:  true,
+          lgpdConsent:  form.consent,
         }),
       })
       if (!sessionRes.ok) {
         const body = await sessionRes.json().catch(() => ({ error: 'Falha ao iniciar conversa' }))
         throw new Error(body.error ?? 'Falha ao iniciar conversa')
       }
-      const sessionBody = await sessionRes.json() as { data: { sessionId: string } }
+      const sessionBody = await sessionRes.json() as {
+        data: { sessionId: string; sessionToken: string }
+      }
       const newSessionId = sessionBody.data.sessionId
+      const newSessionToken = sessionBody.data.sessionToken
 
       await fetch('/api/v1/webchat/messages', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
+        headers: {
+          'Content-Type':    'application/json',
+          'X-Session-Token': newSessionToken,
+        },
+        body: JSON.stringify({
           sessionId:     newSessionId,
           content:       form.message.trim(),
           isFromVisitor: true,
@@ -144,7 +166,7 @@ function ChatRegistration({
       })
 
       postToParent({ type: 'session_started', sessionId: newSessionId })
-      onSessionCreated(newSessionId, form.name.trim() || 'Visitante')
+      onSessionCreated(newSessionId, newSessionToken, form.name.trim() || 'Visitante')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao iniciar conversa')
     } finally {
@@ -278,12 +300,14 @@ function FormField({
 
 function ChatConversation({
   sessionId,
+  sessionToken,
   visitorName,
 }: {
-  sessionId:   string
-  visitorName: string
+  sessionId:    string
+  sessionToken: string
+  visitorName:  string
 }) {
-  const { messages, connected, sendMessage } = useRealtimeChat(sessionId)
+  const { messages, connected, sendMessage } = useRealtimeChat(sessionId, sessionToken)
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)

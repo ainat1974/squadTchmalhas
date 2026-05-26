@@ -38,7 +38,7 @@ function mapRow(row: WebchatMessageRow): ChatMessage {
   }
 }
 
-export function useRealtimeChat(sessionId: string | null) {
+export function useRealtimeChat(sessionId: string | null, sessionToken?: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [connected, setConnected] = useState(false)
   const channelRef = useRef<RealtimeChannel | null>(null)
@@ -87,9 +87,13 @@ export function useRealtimeChat(sessionId: string | null) {
 
   const sendMessage = async (content: string, isFromVisitor: boolean) => {
     if (!sessionId) return
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (isFromVisitor && sessionToken) {
+      headers['X-Session-Token'] = sessionToken
+    }
     const res = await fetch('/api/v1/webchat/messages', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body:    JSON.stringify({ sessionId, content, isFromVisitor }),
     })
     if (!res.ok) {

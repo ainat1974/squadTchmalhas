@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { findOrCreateContactByPhone } from '@/lib/contacts-upsert'
 import {
   verifyWhatsAppWebhook,
   verifyWebhookSignature,
@@ -51,18 +52,14 @@ export async function POST(req: NextRequest) {
 
     // Upsert do contato pelo número de WhatsApp
     const phoneNormalized = `+${msg.from}`
-    const contact = await prisma.contact.upsert({
-      where:  { phone: phoneNormalized },
-      create: {
-        fullName:      `Lead WhatsApp ${msg.from.slice(-4)}`,
-        phone:         phoneNormalized,
-        whatsappPhone: phoneNormalized,
-        isB2b:         false,
-        lgpdConsent:   false,    // Pendente — vendedor deve confirmar consentimento
-        tags:          ['whatsapp', 'pendente-lgpd'],
-        leadSource:    { connect: { id: await getOrCreateLeadSourceId('whatsapp') } },
-      },
-      update: { whatsappPhone: phoneNormalized },
+    const contact = await findOrCreateContactByPhone(phoneNormalized, {
+      fullName:      `Lead WhatsApp ${msg.from.slice(-4)}`,
+      phone:         phoneNormalized,
+      whatsappPhone: phoneNormalized,
+      isB2b:         false,
+      lgpdConsent:   false,
+      tags:          ['whatsapp', 'pendente-lgpd'],
+      leadSource:    { connect: { id: await getOrCreateLeadSourceId('whatsapp') } },
     })
 
     const contentText = msg.text?.body

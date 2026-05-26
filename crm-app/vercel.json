@@ -6,11 +6,11 @@
     },
     {
       "path": "/api/cron/whatsapp-retry",
-      "schedule": "0 6 * * *"
+      "schedule": "*/5 * * * *"
     },
     {
       "path": "/api/cron/webchat-expire",
-      "schedule": "0 7 * * *"
+      "schedule": "*/15 * * * *"
     }
   ],
   "functions": {

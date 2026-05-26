@@ -8,6 +8,7 @@ import { requireAuth, requireDealOwnership } from '@/lib/auth'
 import { handleApiError, Errors } from '@/lib/errors'
 import { logAudit } from '@/lib/audit'
 import { MoveDealStageSchema } from '@/lib/validators/deal'
+import { ensureStageRequiredActivities } from '@/lib/deal-stage-tasks'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -61,6 +62,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       },
       include: { stage: true },
     })
+
+    if (input.stageId !== deal.stageId && !targetStage.isWonStage && !targetStage.isLostStage) {
+      await ensureStageRequiredActivities(id, input.stageId, user)
+    }
 
     await logAudit({
       user,

@@ -9,8 +9,10 @@ import { MobileNav } from './MobileNav'
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/pipeline': 'Pipeline',
+  '/deals': 'Deal',
   '/leads': 'Leads',
   '/chat': 'Chat',
+  '/whatsapp': 'WhatsApp',
   '/tasks': 'Tarefas',
   '/settings': 'Configurações',
   '/settings/pipelines': 'Configurações',

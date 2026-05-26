@@ -7,6 +7,9 @@ import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
 import { handleApiError } from '@/lib/errors'
 import { StartWebchatSchema } from '@/lib/validators/webchat'
+import { checkWebchatRateLimit } from '@/lib/ratelimit'
+import { verifyTurnstileToken } from '@/lib/turnstile'
+import { Errors } from '@/lib/errors'
 import { randomUUID } from 'node:crypto'
 
 export async function GET(req: NextRequest) {
@@ -41,20 +44,32 @@ export async function POST(req: NextRequest) {
   try {
     const input  = StartWebchatSchema.parse(await req.json())
     const ip     = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+
+    const { allowed } = await checkWebchatRateLimit(req)
+    if (!allowed) throw Errors.RATE_LIMITED()
+
+    const turnstileOk = await verifyTurnstileToken(input.turnstileToken, ip)
+    if (!turnstileOk) {
+      throw Errors.FORBIDDEN('Verificação de segurança falhou. Recarregue a página.')
+    }
+
     const ua     = req.headers.get('user-agent') ?? undefined
 
-    const sessionId      = randomUUID()
+    const sessionId       = randomUUID()
+    const sessionToken    = randomUUID()
     const realtimeChannel = `webchat:${sessionId}`
 
     const session = await prisma.webchatSession.create({
       data: {
+        id:              sessionId,
+        sessionToken,
         visitorName:     input.visitorName,
         visitorEmail:    input.visitorEmail,
         visitorPhone:    input.visitorPhone,
         visitorIp:       ip,
         visitorUserAgent: ua,
-        lgpdConsent:     true,
-        lgpdConsentAt:   new Date(),
+        lgpdConsent:     input.lgpdConsent,
+        lgpdConsentAt:   input.lgpdConsent ? new Date() : null,
         pageUrl:         input.pageUrl,
         utmSource:       input.utmSource,
         utmMedium:       input.utmMedium,
@@ -82,6 +97,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       data: {
         sessionId:       session.id,
+        sessionToken:    session.sessionToken,
         realtimeChannel: session.realtimeChannel,
         supabaseUrl:     process.env.NEXT_PUBLIC_SUPABASE_URL,
         supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

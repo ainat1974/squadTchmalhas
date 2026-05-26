@@ -56,9 +56,9 @@ export function KanbanCard({ deal, isDragging = false }: Props) {
       )}
 
       <Link
-        href={`/leads/${deal.contact.id}`}
-        className="line-clamp-2 text-sm font-medium text-fg-primary hover:text-brand-gold"
+        href={`/deals/${deal.id}`}
         onClick={(e) => e.stopPropagation()}
+        className="line-clamp-2 text-sm font-medium text-fg-primary hover:text-brand-gold"
       >
         {deal.title}
       </Link>

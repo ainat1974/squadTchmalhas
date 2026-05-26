@@ -23,7 +23,7 @@ const PublicLeadSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // Rate limiting por IP
-    const { allowed, remaining } = checkRateLimit(req)
+    const { allowed, remaining } = await checkRateLimit(req)
     if (!allowed) throw Errors.RATE_LIMITED()
 
     const input = PublicLeadSchema.parse(await req.json())

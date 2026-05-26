@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
-import { handleApiError } from '@/lib/errors'
+import { handleApiError, Errors } from '@/lib/errors'
 import { z } from 'zod'
 
 const SendMessageSchema = z.object({
@@ -17,16 +17,21 @@ export async function POST(req: NextRequest) {
   try {
     const body = SendMessageSchema.parse(await req.json())
 
-    if (!body.isFromVisitor) {
-      const user = await getCurrentUser()
-      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const session = await prisma.webchatSession.findUnique({
       where: { id: body.sessionId },
     })
     if (!session) {
       return NextResponse.json({ error: 'Sessão não encontrada' }, { status: 404 })
+    }
+
+    if (body.isFromVisitor) {
+      const token = req.headers.get('x-session-token')
+      if (!token || token !== session.sessionToken) {
+        throw Errors.FORBIDDEN('Token de sessão inválido')
+      }
+    } else {
+      const user = await getCurrentUser()
+      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     if (session.status === 'closed' || session.status === 'abandoned') {
       return NextResponse.json({ error: 'Sessão encerrada' }, { status: 400 })

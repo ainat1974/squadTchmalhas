@@ -5,6 +5,7 @@ import { contactsWhereClause } from '@/lib/permissions'
 import { handleApiError } from '@/lib/errors'
 import { logAudit } from '@/lib/audit'
 import { CreateContactSchema, ListContactsSchema } from '@/lib/validators/contact'
+import type { LeadSourceType } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
       ...baseWhere,
       ...(params.isB2b !== undefined && { isB2b: params.isB2b }),
       ...(params.pipeline && { pipelineType: params.pipeline }),
-      ...(params.source && { leadSource: { type: params.source } }),
+      ...(params.source && { leadSource: { type: params.source as LeadSourceType } }),
       ...(params.search && {
         OR: [
           { fullName:    { contains: params.search, mode: 'insensitive' as const } },

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth'
 import { dealsWhereClause } from '@/lib/permissions'
-import { handleApiError } from '@/lib/errors'
+import { handleApiError, Errors } from '@/lib/errors'
 import { logAudit } from '@/lib/audit'
 import { CreateDealSchema, ListDealsSchema } from '@/lib/validators/deal'
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     // Verificar acesso ao pipeline
     const pipeline = await prisma.pipeline.findUnique({ where: { id: input.pipelineId } })
-    if (!pipeline) throw { status: 422, code: 'INVALID_PIPELINE', message: 'Pipeline não encontrado' }
+    if (!pipeline) throw Errors.UNPROCESSABLE('Pipeline não encontrado')
 
     const deal = await prisma.deal.create({
       data: {

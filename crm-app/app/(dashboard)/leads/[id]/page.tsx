@@ -26,9 +26,10 @@ interface Props {
 }
 
 const DEAL_STATUS = {
-  open:  { label: 'Aberto', variant: 'default' as const },
-  won:   { label: 'Ganho', variant: 'secondary' as const },
-  lost:  { label: 'Perdido', variant: 'destructive' as const },
+  open:     { label: 'Aberto', variant: 'default' as const },
+  won:      { label: 'Ganho', variant: 'secondary' as const },
+  lost:     { label: 'Perdido', variant: 'destructive' as const },
+  archived: { label: 'Arquivado', variant: 'outline' as const },
 } satisfies Record<DealStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }>
 
 function dealStatusInfo(status: DealStatus) {

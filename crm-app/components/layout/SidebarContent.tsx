@@ -6,7 +6,7 @@ import { UserMenu } from './UserMenu'
 import { BrandMark } from '@/components/brand/BrandMark'
 import type { User } from '@prisma/client'
 import {
-  LayoutDashboard, KanbanSquare, Users, MessageSquare,
+  LayoutDashboard, KanbanSquare, Users, MessageSquare, MessageCircle,
   CheckSquare, Settings, ChevronRight,
 } from 'lucide-react'
 
@@ -22,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/pipeline',           label: 'Pipeline',      icon: <KanbanSquare    className="h-5 w-5" /> },
   { href: '/leads',              label: 'Leads',         icon: <Users           className="h-5 w-5" /> },
   { href: '/chat',               label: 'Chat',          icon: <MessageSquare   className="h-5 w-5" /> },
+  { href: '/whatsapp',           label: 'WhatsApp',      icon: <MessageCircle   className="h-5 w-5" /> },
   { href: '/tasks',              label: 'Tarefas',       icon: <CheckSquare     className="h-5 w-5" /> },
   { href: '/settings/pipelines', label: 'Configurações', icon: <Settings        className="h-5 w-5" />, roles: ['admin', 'gestor'] },
 ]

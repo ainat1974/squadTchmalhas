@@ -20,10 +20,10 @@ import {
 import { BrandMark } from '@/components/brand/BrandMark'
 
 const kpis = [
-  { label: 'Receita do Mês', value: 'R$ 287.450', delta: '+18%', trend: 'up' as const, icon: DollarSign, accent: 'gold' },
-  { label: 'Novos Leads',    value: '142',         delta: '+24%', trend: 'up' as const, icon: Users,      accent: 'sage' },
-  { label: 'Taxa Conversão', value: '18,2%',       delta: '+3,1pp', trend: 'up' as const, icon: Target,    accent: 'positive' },
-  { label: 'Atrasadas',      value: '7',           delta: '-12%', trend: 'down' as const, icon: AlertTriangle, accent: 'negative' },
+  { label: 'Receita do Mês', value: 'R$ 287.450', delta: '+18%', trend: 'up' as const, icon: DollarSign, accent: 'gold' as const },
+  { label: 'Novos Leads',    value: '142',         delta: '+24%', trend: 'up' as const, icon: Users,      accent: 'sage' as const },
+  { label: 'Taxa Conversão', value: '18,2%',       delta: '+3,1pp', trend: 'up' as const, icon: Target,    accent: 'positive' as const },
+  { label: 'Atrasadas',      value: '7',           delta: '-12%', trend: 'down' as const, icon: AlertTriangle, accent: 'negative' as const },
 ]
 
 const funnel = [
@@ -56,7 +56,7 @@ const NAV_ITEMS = [
 ]
 
 export default function PreviewDashboardPage() {
-  const maxFunnel = funnel[0].count
+  const maxFunnel = funnel[0]?.count ?? 1
 
   return (
     <div className="bg-canvas flex min-h-screen text-fg-primary">
