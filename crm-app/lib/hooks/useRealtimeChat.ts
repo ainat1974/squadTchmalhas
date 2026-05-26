@@ -14,6 +14,30 @@ export interface ChatMessage {
   readAt?:      string | null
 }
 
+interface WebchatMessageRow {
+  id:              string
+  session_id:      string
+  content:         string
+  is_from_visitor: boolean
+  visitor_name?:   string | null
+  user_id?:        string | null
+  created_at:      string
+  read_at?:        string | null
+}
+
+function mapRow(row: WebchatMessageRow): ChatMessage {
+  return {
+    id:            row.id,
+    sessionId:     row.session_id,
+    content:       row.content,
+    isFromVisitor: row.is_from_visitor,
+    visitorName:   row.visitor_name ?? null,
+    userId:        row.user_id ?? null,
+    createdAt:     row.created_at,
+    readAt:        row.read_at ?? null,
+  }
+}
+
 export function useRealtimeChat(sessionId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [connected, setConnected] = useState(false)
@@ -24,17 +48,15 @@ export function useRealtimeChat(sessionId: string | null) {
 
     const supabase = getSupabaseBrowserClient()
 
-    // Carregar histórico inicial
     supabase
       .from('webchat_messages')
       .select('*')
       .eq('session_id', sessionId)
       .order('created_at', { ascending: true })
       .then(({ data }) => {
-        if (data) setMessages(data as ChatMessage[])
+        if (data) setMessages((data as WebchatMessageRow[]).map(mapRow))
       })
 
-    // Subscribir a novas mensagens via Postgres Changes
     const channel = supabase
       .channel(`webchat:${sessionId}`)
       .on(
@@ -46,7 +68,10 @@ export function useRealtimeChat(sessionId: string | null) {
           filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
-          setMessages(prev => [...prev, payload.new as ChatMessage])
+          const row = payload.new as WebchatMessageRow
+          setMessages((prev) =>
+            prev.some((m) => m.id === row.id) ? prev : [...prev, mapRow(row)],
+          )
         },
       )
       .subscribe((status) => {
@@ -62,11 +87,19 @@ export function useRealtimeChat(sessionId: string | null) {
 
   const sendMessage = async (content: string, isFromVisitor: boolean) => {
     if (!sessionId) return
-    await fetch('/api/v1/webchat/messages', {
+    const res = await fetch('/api/v1/webchat/messages', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ sessionId, content, isFromVisitor }),
     })
+    if (!res.ok) {
+      const body = await res.json().catch(() => null) as { error?: string } | null
+      throw new Error(body?.error ?? 'Falha ao enviar mensagem')
+    }
+    const body = await res.json() as { data: WebchatMessageRow }
+    setMessages((prev) =>
+      prev.some((m) => m.id === body.data.id) ? prev : [...prev, mapRow(body.data)],
+    )
   }
 
   return { messages, connected, sendMessage }

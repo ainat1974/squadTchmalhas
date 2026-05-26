@@ -15,9 +15,12 @@ export function formatCurrency(value: number | null | undefined): string {
   }).format(value)
 }
 
-/** Formatar data relativa (ex: "há 2 dias") */
-export function formatRelative(date: Date | string): string {
-  const d     = typeof date === 'string' ? new Date(date) : date
+/** Formatar data relativa (ex: "há 2 dias") — tolerante a null/undefined */
+export function formatRelative(date: Date | string | null | undefined): string {
+  if (date == null) return ''
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return ''
+
   const diff  = Date.now() - d.getTime()
   const mins  = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
@@ -30,9 +33,14 @@ export function formatRelative(date: Date | string): string {
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(d)
 }
 
-/** Formatar data pt-BR */
-export function formatDate(date: Date | string, opts?: Intl.DateTimeFormatOptions): string {
+/** Formatar data pt-BR — tolerante a null/undefined */
+export function formatDate(
+  date: Date | string | null | undefined,
+  opts?: Intl.DateTimeFormatOptions,
+): string {
+  if (date == null) return ''
   const d = typeof date === 'string' ? new Date(date) : date
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return ''
   return new Intl.DateTimeFormat('pt-BR', opts ?? { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d)
 }
 
