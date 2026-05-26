@@ -12,11 +12,11 @@
 |----------|-------------------------|---------------|
 | **Produto MVP (uso interno)** | ~21% · não pronto | **~75%** — WhatsApp UI, deals, forms, hard block, LGPD mínima |
 | **Segurança boundary** | 7 P0 abertos | **Maioria fechada** — middleware, TS strict, sessionToken, migrations, advisors |
-| **Smoke automatizado** | 0 testes | **15/15 rotas públicas + API** · **9/10 autenticado** (1 fix em código, deploy pendente) |
+| **Smoke automatizado** | 0 testes | **Rotas públicas OK** · **10/10 API autenticada** (deploy `b1cb186`) |
 | **Widget Irroba** | Inexistente | **Pronto para colar** — snippet + Realtime **PASS** (~1,9s) |
 | **Go-live equipe (Vitor/Amanda/Renato)** | Não | **Sim, com ressalvas** (ver checklist abaixo) |
 
-**Resumo em uma frase:** O CRM passou de “demo quebrada” para **operável em produção para o time interno**, com webchat/widget validados tecnicamente; faltam **1 deploy** (fix telefone duplicado + CSP apex), **env `WEBCHAT_ALLOWED_ORIGINS`** na Vercel, e **habilitar HIBP** no Supabase Auth.
+**Resumo em uma frase:** O CRM está **operável em produção para o time interno** (deploy `b1cb186`, `WEBCHAT_ALLOWED_ORIGINS` configurado); pendente apenas **HIBP no Supabase Auth** (1 clique no dashboard) e **colar snippet na Irroba**.
 
 ---
 

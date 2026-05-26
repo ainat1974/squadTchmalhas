@@ -34,7 +34,7 @@ Login Supabase: `POST /auth/v1/token?grant_type=password` com header `apikey: sb
 |---|-------|----------|------|------|
 | A | `GET /api/v1/contacts` | 200 + 10 seed | **200** (`meta.total=10`, 10 itens) | ✅ |
 | B | `POST /api/v1/contacts` (phone único) | 201 | **201** | ✅ |
-| C | `POST /api/v1/contacts` (mesmo phone de B) | 4xx (unique) | **500** `INTERNAL_ERROR` | ❌ |
+| C | `POST /api/v1/contacts` (mesmo phone de B) | 4xx (unique) | **409** `CONFLICT` (após deploy `b1cb186`) | ✅ |
 | D | `GET /api/v1/deals` | 200 + lista | **200** (`meta.total=5`) | ✅ |
 | E | `POST /api/v1/deals` (pipeline varejo, 1º stage) | 201 | **201** | ✅ |
 | F | `PATCH /api/v1/deals/:id/stage` (atacado → Negociação c/ tarefas pendentes) | 409 | **409** `CONFLICT` + `pendingMandatoryTasks` (2 itens) | ✅ |
@@ -43,7 +43,7 @@ Login Supabase: `POST /auth/v1/token?grant_type=password` com header `apikey: sb
 | I | Novo deal + `PATCH .../status` Lost + `lostReason` | 200 | **200** (`status=lost`) | ✅ |
 | J | `GET /api/v1/whatsapp/conversations` | 200 | **200** (`data=[]`) | ✅ |
 
-**Score: 9/10 passando**
+**Score: 10/10 passando** (revalidado pós-deploy `b1cb186` via `scripts/smoke-flow-c-duplicate-phone.mjs`)
 
 ---
 
