@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import type { User } from '@prisma/client'
 import { Bell, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { MobileNav } from './MobileNav'
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -41,12 +42,17 @@ export function Header({ user }: Props) {
   const firstName = user.fullName.split(' ')[0]
 
   return (
-    <header className="filter-bar-sticky flex h-16 shrink-0 items-center justify-between px-6">
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-fg-muted">
-          {greeting}, {firstName}
-        </p>
-        <h1 className="text-lg font-semibold tracking-tight text-fg-primary">{title}</h1>
+    <header className="filter-bar-sticky flex h-16 shrink-0 items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="flex min-w-0 items-center gap-3">
+        <MobileNav user={user} />
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-widest text-fg-muted">
+            {greeting}, {firstName}
+          </p>
+          <h1 className="truncate text-lg font-semibold tracking-tight text-fg-primary">
+            {title}
+          </h1>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
