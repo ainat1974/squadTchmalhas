@@ -3,6 +3,7 @@
  * Segue RFC 7807 Problem Details for HTTP APIs
  */
 import { NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { ZodError } from 'zod'
 
 export class ApiError extends Error {
@@ -55,6 +56,32 @@ export function handleApiError(err: unknown): NextResponse {
         },
       },
       { status: err.status },
+    )
+  }
+
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    const fields = Array.isArray(err.meta?.target) ? (err.meta.target as string[]) : []
+    if (fields.includes('phone')) {
+      return NextResponse.json(
+        {
+          error: {
+            code:    'CONFLICT',
+            message: 'Já existe um contato com este telefone',
+            details: { field: 'phone' },
+          },
+        },
+        { status: 409 },
+      )
+    }
+    return NextResponse.json(
+      {
+        error: {
+          code:    'CONFLICT',
+          message: 'Registro duplicado',
+          details: { fields },
+        },
+      },
+      { status: 409 },
     )
   }
 

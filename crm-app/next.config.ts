@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://*.irroba.com.br https://irroba.com.br https://*.techmalhas.com.br",
+            value: "frame-ancestors 'self' https://*.irroba.com.br https://irroba.com.br https://techmalhas.com.br https://www.techmalhas.com.br https://*.techmalhas.com.br",
           },
         ],
       },
